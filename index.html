@@ -1011,9 +1011,6 @@
         </div>
       </div>
       <div class="footer-note">Arkar Min Aung, ML Engineer</div>
-      <div class="notes">Open here. The whole talk is one argument: the next leap may not be more scale, but noticing
-        where representations are wasteful, and that waste has exploitable geometric structure. Three papers, three
-        layers (the rail at bottom-left tracks which one we are on). Every demo is live. Drag them.</div>
     </section>
 
     <section class="slide" id="s-hook" data-accent="amber">
@@ -1024,8 +1021,7 @@
         in more resources. Bigger
         models, more data, and more GPUs. <b> But there is a lot of room to improve by making things more efficient and
           effective.</b></div>
-      <div class="notes">The scaling bet was right and paid for itself. But "bigger" is not the only axis. Set up the
-        turn: instead of adding capacity, find where the model is wasteful. Hold on the number for a beat.</div>
+       
     </section>
 
     <section class="slide" id="s-reframe" data-act="all">
@@ -1054,9 +1050,7 @@
           <div class="cp">engram</div>
         </div>
       </div>
-      <div class="notes">The spine, stated once. Three costs everyone treats as fixed: memory, data, depth. Each is an
-        artifact of a default setup, not a requirement, and the fix is structure already in the model. Each act takes
-        one cost and shows the cost was never necessary.</div>
+       
     </section>
 
     <!-- ===================== ACT I - TURBOQUANT / STORAGE ===================== -->
@@ -1083,8 +1077,7 @@
       </div>
       <div class="ctl"><label>context length <input id="kv-len" type="range" min="0" max="100" value="38"><span
             class="val" id="kv-lenv">8k</span></label></div>
-      <div class="notes">Frame the cost. The cache is linear in context and at long context it passes the weights.
-        INT4 is the obvious 4x win. Tee up why it fails: outliers. Slide the context to show the crossover.</div>
+       
     </section>
 
     <section class="slide" id="s-quant" data-act="storage" data-accent="amber">
@@ -1117,9 +1110,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">Ground the primitive: quantizing is rounding to the nearest of 4, 8, or 16 levels. Drag the
-        value, watch it snap, see the error. Then name the disease (a real key is spiky) and the cure (rotate). Next
-        slide answers the obvious worry: are we even allowed to rotate?</div>
+       
     </section>
 
     <section class="slide" id="s-widegrid" data-act="storage" data-accent="amber">
@@ -1154,11 +1145,7 @@
         </div>
       </div>
       <div class="footer-note">So the fix is not more bits. It is to change the vector's shape before rounding.</div>
-      <div class="notes">The bridge from quantizing to rotating. One fixed grid serves the whole vector, so its level
-        spacing is set by the largest coordinate. On a lopsided real key, the outlier stretches the grid and the small
-        coordinates round to the same level, indistinguishable. Grow the outlier and watch the small coordinates get
-        lost and the used levels collapse toward two. The point: you cannot bit your way out of a bad shape, so reshape
-        the vector first. The tool is a rotation, which is the next slide.</div>
+       
     </section>
 
     <section class="slide" id="s-rotate" data-act="storage" data-accent="amber">
@@ -1195,9 +1182,7 @@
       </div>
       <div class="footer-note">This technique of using vector rotation to make well-formed key and query vectors appears
         in various literature: DRIVE (arXiv 2105.08339), EDEN (2108.08842), and RaBitQ (2405.12497).</div>
-      <div class="notes">The license, placed before the dimension demos. Rotation preserves inner products (free, the
-        model cannot tell) and length (energy can only spread, not grow). Demo: spin q and k, the dot product holds.
-        The next three slides deliver on the promise that the energy spreads: 2D, then 3D, then high-D.</div>
+       
     </section>
 
     <section class="slide" id="s-spin2d" data-act="storage" data-accent="amber">
@@ -1227,10 +1212,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">The mechanism, in the simplest case. A spike at (1,0) turned by 45 degrees becomes
-        (0.71, 0.71): the tall coordinate drops as the length pours into the other axis. This is exactly what a
-        rotation does, and the next slides show it in three dimensions, then why high dimensions force it, then a
-        real 64-dimensional key.</div>
+       
     </section>
 
     <section class="slide" id="s-spin3d" data-act="storage" data-accent="amber">
@@ -1261,10 +1243,7 @@
         </div>
       </div>
       <div class="footer-note">A typical coordinate is about 1/√3, near 0.58.</div>
-      <div class="notes">The 2D to high-D bridge, lifted from the explainer's §3 spike-in-3D demo. Start on the spike,
-        click fresh rotation, and watch the size split across x₁, x₂, x₃ while the length readout holds at 1.00. Drag
-        the tip to steer it, orbit to look around. The 1/√3 line on the bars previews the concentration argument: more
-        dimensions, smaller typical coordinate.</div>
+       
     </section>
 
     <section class="slide" id="s-concentrate" data-act="storage" data-accent="amber">
@@ -1294,10 +1273,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">The why behind the flattening, the concentration demo from the explainer. A random rotation
-        is a random point on a sphere; the fixed length is shared across d coordinates, so a typical one is about
-        1/√d. Raise d and the distribution of a single coordinate collapses toward zero. That is why
-        high-dimensional keys have no real outliers once you rotate.</div>
+       
     </section>
 
     <section class="slide" id="s-outlier" data-act="storage" data-accent="amber">
@@ -1339,10 +1315,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">The problem and the tax. Left: a real key, energy piled into one or two outlier channels. The
-        standard fix (KIVI/GPTQ/AWQ) stores per-block min/max in fp16, a header tax, plus calibration. TurboQuant
-        refuses both and takes two moves. Drag rotate to preview move one; the right panel spreads while the length
-        readout holds. The next slides explain why it works and why it is allowed.</div>
+       
     </section>
 
     <section class="slide" id="s-codebook" data-act="storage" data-accent="amber">
@@ -1373,10 +1346,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">Move two, the real contribution. Because the post-rotation marginal is one known density,
-        Lloyd-Max solves once for the optimal levels: dense in the middle, sparse in the tails. One tiny table, no
-        calibration, no per-block headers. Drag bits to watch the levels re-pack. Hardcoded Lloyd-Max centroids for the
-        unit Gaussian.</div>
+       
     </section>
 
     <section class="slide" id="s-bias" data-act="storage" data-accent="amber">
@@ -1410,10 +1380,7 @@
       </div>
       <div class="footer-note">At one bit the score keeps only 2/π, about 0.64 of its value, on every key. So
         reconstruction solved one problem, and the inner product is a different one.</div>
-      <div class="notes">The bias, the heart of the paper. The MSE-optimal decode is the bin mean, which sits closer to
-        0 than the inputs, so the reconstruction is a shrunken copy. The staircase shows ỹ(y) sitting inside the
-        identity line: shrinkage. The inner-product multiplier is λ_b = E[ỹ²]/σ² (0.64 / 0.88 / 0.97 for b=1,2,3). Same
-        factor every trial, so averaging does not help.</div>
+       
     </section>
 
     <section class="slide" id="s-qjl" data-act="storage" data-accent="amber">
@@ -1445,9 +1412,7 @@
       </div>
       <div class="footer-note">Same one bit, the difference is where it is spent. The biased mean parks at 0.64; the
         corrected one reaches the truth.</div>
-      <div class="notes">QJL, the un-biaser. Fire trials: the round-only estimate clusters tightly but its mean sits at
-        0.64 (biased, never moves). The +residual-bit estimate scatters wider but its running mean converges to 1.00
-        (unbiased, higher variance). Bias vs variance, made visible. This is TurboQuant-prod.</div>
+       
     </section>
 
     <section class="slide" id="s-recipe" data-act="storage" data-accent="amber">
@@ -1472,9 +1437,7 @@
             unbiased.</div>
         </div>
       </div>
-      <div class="notes">The recap, breathing on its own slide. Three steps: rotate (free, prior art), round with the
-        universal codebook (b-1 bits), correct with one sign bit (QJL). One scalar per vector, the residual norm, versus
-        a header per block elsewhere. Say "rotate, round, correct" and move to the receipt.</div>
+       
     </section>
 
     <section class="slide" id="s-shannon" data-act="storage" data-accent="amber">
@@ -1504,9 +1467,7 @@
       </div>
       <div class="footer-note">Exponential in the bits, and proven for every bit-width. That near-optimality is what
         TurboQuant genuinely adds, and it is why a handful of bits is enough.</div>
-      <div class="notes">Near-optimality. Shannon floor 4^-b (gold), TurboQuant (sqrt(3)π/2)·4^-b ≈ 2.7x above and
-        parallel (amber), old data-free sketch ~1/b which starts close but falls behind fast (red). Log y-axis, so a
-        constant gap is a constant vertical offset. Same exponential slope as the floor is the point.</div>
+       
     </section>
 
     <!-- <section class="slide" id="s-tqresults" data-act="storage" data-accent="amber">
@@ -1524,8 +1485,7 @@
         <div class="barline win"><span class="nm">TurboQuant</span><span class="track"><i data-v="99.7"></i></span><span class="vv">0.997</span></div>
       </div>
       <div class="footer-note">Needle in a haystack · Llama-3.1-8B-Instruct · 4k to 104k tokens · 4x compression</div>
-      <div class="notes">The receipt. TurboQuant at 4x matches full precision (0.997) and beats every other KV
-        compressor. Bars animate in. Let the green TurboQuant row land last.</div>
+       
     </section> -->
 
     <!-- <section class="slide" id="s-tqpunch" data-act="storage" data-accent="amber">
@@ -1533,8 +1493,7 @@
       <h2 class="wide" style="font-size:clamp(28px,4.8vw,68px);max-width:26ch">A key was always a few bits. You paid for
         the <span class="acc">packaging:</span> the wrong basis, an untuned codebook, an estimator that shrank every score.</h2>
       <div class="footer-note">TurboQuant · Zandieh, Daliri, Hadian, Mirrokni · arXiv 2504.19874</div>
-      <div class="notes">Land Act I. The content was never the problem. The coordinate system was. Pause, then pivot:
-        same shape of mistake shows up in training.</div>
+       
     </section> -->
 
     <!-- ===================== ACT II - SEMANTIC TUBE / LEARNING ===================== -->
@@ -1565,8 +1524,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">Set the stakes. The power law is not destiny, it describes one objective. STP shifts the
-        curve left. Slide the budget: the blue curve reaches the same loss far earlier.</div>
+       
     </section>
 
     <section class="slide" id="s-conflate" data-act="learning" data-accent="blue">
@@ -1597,9 +1555,7 @@
             drift apart, and the drift compounds.</div>
         </div>
       </div>
-      <div class="notes">Two sentences, one meaning. NTP treats every surface token as a separate target, so it spends
-        capacity memorizing word order. Plus exposure bias. Both point to the same cure: constrain the trajectory,
-        not the tokens.</div>
+       
     </section>
 
     <section class="slide" id="s-path" data-act="learning" data-accent="blue">
@@ -1618,9 +1574,7 @@
           <div class="ctl"><button class="btn" id="path-go">read the sentence</button></div>
         </div>
       </div>
-      <div class="notes">The foundational picture for the act. Tokens arrive, the hidden state walks point to point,
-        tracing a path. Replay it once. After "sentence equals path", the geodesic and the tube need no extra
-        setup.</div>
+       
     </section>
 
     <section class="slide" id="s-step" data-act="learning" data-accent="blue">
@@ -1652,9 +1606,7 @@
             earlier points, so the whole run stays straight, not just neighbors. That is the loss.</div>
         </div>
       </div>
-      <div class="notes">The primitive the loss is built on. Two consecutive steps, the angle between them is the bend,
-        and STP's loss is just 1 minus its cosine. Bend the path and watch the number grow. After this, the tube and
-        the gauge on the next slide need no setup.</div>
+       
     </section>
 
     <section class="slide" id="s-decomp" data-act="learning" data-accent="blue">
@@ -1686,11 +1638,7 @@
       </div>
       <div class="footer-note">A straight path is all along and nothing across. That is why it is the low-noise one.
         Every bit of across is data the model has to fit and then average away.</div>
-      <div class="notes">The definition of signal and noise, made geometric, lifted from the explainer's primer. One
-        step
-        splits against the direction of travel: the along part is progress (green, signal), the across part is wobble
-        (red, noise). Tilt the step and the across part grows. A straight path has zero across, so it is the only
-        low-noise one. This is exactly the split the tube enforces on the next slide.</div>
+       
     </section>
 
     <section class="slide" id="s-tube" data-act="learning" data-accent="blue">
@@ -1728,9 +1676,7 @@
                 id="tube-eps" type="range" min="0.12" max="0.55" step="0.01" value="0.30"></label></div>
         </div>
       </div>
-      <div class="notes">The core intuition. The loss is one cosine: how much consecutive steps bend. Drag h_r off the
-        axis and the red noise vector grows while the gauge climbs green to red. Auto-train shows the gradient pulling
-        it back into the tube. This is the whole method, made physical.</div>
+       
     </section>
 
     <section class="slide" id="s-objective" data-act="learning" data-accent="blue">
@@ -1758,11 +1704,7 @@
             predictor. And λ is zero at inference, so it costs nothing to run.</div>
         </div>
       </div>
-      <div class="notes">The method, and the JEPA framing the paper is named for. STP is a JEPA-style regularizer for
-        language: predict in representation space, but using the sequence's own trajectory instead of two augmented
-        views. The full objective is just L_NTP + λ·L_STP with λ ≈ 0.01 to 0.08. No predictor network (identity is
-        optimal under the geodesic hypothesis), no extra forward pass, cheaper than the group's earlier LLM-JEPA. And
-        λ = 0 at inference, so zero runtime cost. One term, no new machinery.</div>
+       
     </section>
 
     <section class="slide" id="s-collapse" data-act="learning" data-accent="blue">
@@ -1796,8 +1738,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">The diversity story. Toggle STP off: the two ensembles bleed together and merge to one mode
-        collapse. On: the cones tighten and stay separated. This is why straightness preserves diversity.</div>
+       
     </section>
 
     <section class="slide" id="s-oneknob" data-act="learning" data-accent="blue">
@@ -1831,9 +1772,7 @@
         <span class="footer-note" id="fuse-punch" style="margin:0">Raw training: low SNR, you would need ~16x the
           data.</span>
       </div>
-      <div class="notes">The money slide. Drag training to the right: path straightens, loss falls, SNR climbs, data
-        needed drops to one sixteenth, accuracy rises to the full-data line. The entire thesis in one gesture.
-        Illustrative numbers, calibrated to the paper's 16x.</div>
+       
     </section>
 
     <!-- <section class="slide" id="s-stppunch" data-act="learning" data-accent="blue">
@@ -1841,8 +1780,7 @@
       <h2 class="wide" style="font-size:clamp(30px,5.2vw,76px);max-width:26ch">Most of what next-token training works so
         hard to fit is <span class="acc">wobble that averages out.</span> Straighten the path and that work disappears.</h2>
       <div class="footer-note">Semantic Tube Prediction · Huang, LeCun, Balestriero · arXiv 2602.22617</div>
-      <div class="notes">Land Act II. NTP wastes data fitting noise orthogonal to the geodesic. Straighten the path
-        and the data requirement collapses. Pivot to compute: the model also wastes whole layers.</div>
+       
     </section> -->
 
     <!-- ===================== ACT III - ENGRAM / COMPUTE ===================== -->
@@ -1869,9 +1807,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">The waste, shown directly. PatchScopes reads each layer: the model assembles a known entity
-        step by step. That is compute spent reconstructing a lookup. Rows reveal one per layer, like the model
-        discovering it.</div>
+       
     </section>
 
     <section class="slide" id="s-sparse" data-act="compute" data-accent="purple">
@@ -1892,8 +1828,7 @@
       </div>
       <div class="footer-note">A fact you can look up should not cost a full expert. Engram puts the second kind of
         sparsity next to the first.</div>
-      <div class="notes">Frame the new axis. MoE chooses which computation to run. Engram chooses which memory to
-        read. They are complements. The next slides show how Engram does the read and how to balance the two.</div>
+       
     </section>
 
     <section class="slide" id="s-engram" data-act="compute" data-accent="purple">
@@ -1941,9 +1876,7 @@
       </div>
       <div class="footer-note">Tables run 5.7B to 18.5B params, offloaded to host DRAM. Deterministic lookup means
         async prefetch, under 3% throughput cost.</div>
-      <div class="notes">The fix. Memory is a third sparsity axis alongside MoE. Retrieve the static pattern by hash,
-        gate it, inject early. The big table lives in cheap host memory, prefetched, so it is nearly free at
-        inference.</div>
+       
     </section>
 
     <section class="slide" id="s-ucurve" data-act="compute" data-accent="purple">
@@ -1978,9 +1911,7 @@
       </div>
       <div class="footer-note">At the floor, Engram-27B beats an iso-param iso-FLOPs MoE baseline everywhere, with the
         biggest gains on reasoning, code, and math.</div>
-      <div class="notes">Drag to the bottom of the U, around 75 to 80% MoE. The point: memory and conditional
-        compute are complements, not rivals. The win shows up most on reasoning, not just recall, because depth is
-        freed.</div>
+       
     </section>
 
     <section class="slide" id="s-deeper" data-act="compute" data-accent="purple">
@@ -2011,9 +1942,7 @@
           </div>
         </div>
       </div>
-      <div class="notes">CKA aligns Engram and MoE layers. The bright diagonal sits above the true diagonal: shallow
-        Engram layers equal deeper MoE layers. Plus the gate lights up on named entities and idioms, an emergent
-        behavior. Effectively a deeper model at the same cost.</div>
+       
     </section>
 
     <!-- <section class="slide" id="s-engramresults" data-act="compute" data-accent="purple">
@@ -2034,9 +1963,7 @@
       </div>
       <div class="footer-note">And by freeing attention for global context, long-context retrieval jumps most of all:
         multi-query needle 84.2 → 97.0.</div>
-      <div class="notes">The receipt, mirroring Act I's s-tqresults. Built for knowledge (MMLU +3.4, CMMLU +4.0) but the
-        larger gains are reasoning (BBH +5.0, ARC +3.7) and code/math (HumanEval +3.0, MATH +2.4), because freeing the
-        early layers helps reasoning most. Long-context NIAH 84.2 to 97.0. Let the green BBH row land last.</div>
+       
     </section> -->
 
     <!-- <section class="slide" id="s-engrampunch" data-act="compute" data-accent="purple">
@@ -2045,8 +1972,7 @@
         lookup. Rebuilding it through attention is <span class="acc">many layers.</span> So Engram just reads.</h2>
       <div class="footer-note" style="margin-bottom:1.4vh">Again, the cost was in the method, not the task. A fact you can look up should never cost a layer of compute.</div>
       <div class="footer-note">Engram · Cheng, Zeng, Dai et al. · DeepSeek &amp; Peking University · arXiv 2601.07372</div>
-      <div class="notes">Land Act III. Retrieve the statics, compute the dynamics. Same FLOPs, effectively more
-        depth. Now pull the three together.</div>
+       
     </section> -->
 
     <!-- ===================== SYNTHESIS ===================== -->
@@ -2088,8 +2014,7 @@
             model depth</span>
         </div>
       </div>
-      <div class="notes">The receipts side by side. Same column shape: a waste, a geometric fix, a multiplier. Three
-        layers of the stack, three teams, no shared citations.</div>
+       
     </section>
 
     <!-- <section class="slide" id="s-thread" data-act="all">
@@ -2104,8 +2029,7 @@
         The model was already holding it.</h2>
       <div class="footer-note">A better basis, a straighter path, a stored fact. In every case the cost came from the
         method, not the task.</div>
-      <div class="notes">The thesis in one line. Every result is the same shape: the model was paying to recompute
-        structure that the representation already contained. Find it, exploit it, stop paying.</div>
+       
     </section> -->
 
     <!-- <section class="slide" id="s-close" data-act="all" data-accent="blue">
@@ -2118,8 +2042,7 @@
         <div class="footer-note" style="margin-top:3.4vh">Play with the demos:
           arkaung.github.io/interactive-turboquant · interactive-semantic-tube</div>
       </div>
-      <div class="notes">Close. Bring it home: scale is one axis, but understanding waste is another, and it is
-        cheaper. Point to the live explainers. Thank the audience.</div>
+       
     </section> -->
 
     <!-- BUILD:SLIDES -->
