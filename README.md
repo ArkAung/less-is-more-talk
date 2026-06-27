@@ -1,5 +1,4 @@
-# Less is More · Efficient LLMs
-
+# Less is More
 ![Talk Preview](assets/page.png)
 
 This presentation explores how to maximize efficiency in Large Language Models (LLMs) by addressing three key dimensions of waste: **Memory**, **Data**, and **Architecture**.
