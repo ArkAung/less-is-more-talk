@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Less is More · Efficient LLMs</title>
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2307090e'/><path d='M5 23 Q16 7 27 9' fill='none' stroke='%236db0f5' stroke-width='2.2' stroke-linecap='round'/><circle cx='9' cy='20' r='1.9' fill='%23f5a623'/><circle cx='17' cy='13' r='1.9' fill='%236db0f5'/><circle cx='25' cy='10' r='1.9' fill='%23a78bfa'/></svg>">
+  <meta name="theme-color" content="#07090e">
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] }, options: { renderActions: { addMenu: [0, '', ''] } } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --bg2: #0a0e15;
+      --panel: #0c1119;
+      --panel2: #0f1521;
+      --line: #19212f;
+      --line2: #2a3547;
+      --text: #e9eef5;
+      --dim: #9aa7bc;
+      --mute: #5d6a81;
+      --mute2: #3a4559;
+      --amber: #f5a623;
+      --blue: #6db0f5;
+      --purple: #a78bfa;
+      --green: #46d07f;
+      --red: #fb7185;
+      --accent: var(--blue);
+      --accent-rgb: 109, 176, 245;
+      --c-bg: #07090e;
+      --c-grid: #141c2a;
+      --c-grid-soft: #0f1622;
+      --c-axis: #2a3547;
+      --c-text: #e9eef5;
+      --c-dim: #9aa7bc;
+      --c-mute: #5d6a81;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: var(--bg); color: var(--text);
+      font-family: "Space Grotesk", -apple-system, system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    .slide[data-accent="amber"] { --accent: var(--amber); --accent-rgb: 245, 166, 35; }
+    .slide[data-accent="blue"] { --accent: var(--blue); --accent-rgb: 109, 176, 245; }
+    .slide[data-accent="purple"] { --accent: var(--purple); --accent-rgb: 167, 139, 250; }
+    .slide[data-accent="green"] { --accent: var(--green); --accent-rgb: 70, 208, 127; }
+
+    .deck { position: fixed; inset: 0; }
+
+    /* instrument bezel + corner brackets (the signature frame) */
+    #frame { position: fixed; inset: 16px; border: 1px solid var(--line); border-radius: 3px; pointer-events: none; z-index: 40; }
+    #frame i { position: absolute; width: 15px; height: 15px; border-color: var(--line2); border-style: solid; }
+    #frame i.f-tl { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; }
+    #frame i.f-tr { top: -1px; right: -1px; border-width: 1.5px 1.5px 0 0; }
+    #frame i.f-bl { bottom: -1px; left: -1px; border-width: 0 0 1.5px 1.5px; }
+    #frame i.f-br { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; }
+
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 9vh 9vw 11vh;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity .42s ease, transform .42s ease;
+      pointer-events: none; overflow: hidden;
+    }
+    .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+
+    .slide::before {
+      content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(var(--accent-rgb), 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(var(--accent-rgb), 0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 75% at 50% 50%, #000 45%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 50%, #000 45%, transparent 100%);
+    }
+    .slide > * { position: relative; z-index: 1; }
+
+    /* eyebrow: PART NN · LAYER */
+    .kicker {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 1.05vw, 13.5px); font-weight: 500;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.6vh;
+      display: inline-flex; align-items: center; gap: 12px;
+    }
+    .kicker::before { content: ""; width: 8px; height: 8px; background: var(--accent); box-shadow: 0 0 9px var(--accent); }
+    .rule { height: 1px; background: var(--line); width: 100%; max-width: 60vw; margin: 0 0 3.2vh; position: relative; }
+    .rule::before { content: ""; position: absolute; left: 0; top: 0; width: 64px; height: 1px; background: var(--accent); }
+
+    h1 {
+      font-family: "Space Grotesk", sans-serif; font-weight: 600;
+      font-size: clamp(44px, 8.5vw, 132px); line-height: 0.95;
+      letter-spacing: -0.035em; margin: 0; color: var(--text);
+    }
+    h2 {
+      font-family: "Space Grotesk", sans-serif; font-weight: 500;
+      font-size: clamp(28px, 4.6vw, 66px); line-height: 1.02;
+      letter-spacing: -0.025em; margin: 0 0 3vh; color: var(--text); max-width: 18ch;
+    }
+    h2.wide { max-width: 24ch; }
+    .acc { color: var(--accent); }
+    .lead {
+      font-size: clamp(16px, 1.75vw, 25px); line-height: 1.5; color: var(--dim);
+      font-weight: 400; max-width: 30ch;
+    }
+    .lead.wide { max-width: 46ch; }
+    .lead b { color: var(--text); font-weight: 600; }
+    p { margin: 0 0 1.1em; color: var(--dim); line-height: 1.55; }
+    b, strong { color: var(--text); font-weight: 600; }
+    .mono { font-family: "JetBrains Mono", monospace; }
+    .footer-note {
+      font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 0.95vw, 13px);
+      color: var(--mute); letter-spacing: 0.04em; margin-top: 3.4vh;
+    }
+    .footer-note b { color: var(--dim); font-weight: 500; }
+
+    .stat {
+      font-family: "Space Grotesk", sans-serif; font-weight: 700;
+      font-size: clamp(72px, 15vw, 230px); line-height: 0.86; letter-spacing: -0.045em;
+      color: var(--accent);
+    }
+    .stat-sub { font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 1.3vw, 17px); color: var(--mute); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 2vh; }
+
+    .row { display: flex; gap: 3vw; align-items: center; }
+    .row.top { align-items: flex-start; }
+    .grow { flex: 1 1 0; min-width: 0; }
+    .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4vw; }
+    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2.6vw; align-items: center; }
+    .cols2.demo-left { grid-template-columns: 1.4fr 1fr; }
+
+    /* cards with corner brackets */
+    .card {
+      background: linear-gradient(180deg, var(--panel) 0%, var(--bg2) 100%);
+      border: 1px solid var(--line); border-radius: 3px; padding: 2.4vh 1.5vw; position: relative;
+    }
+    .card::before, .card::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--accent); border-style: solid; }
+    .card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+    .card::after { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+    .card .cl { font-family: "JetBrains Mono", monospace; font-size: clamp(9.5px, 0.9vw, 12px); letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute); margin-bottom: 1.4vh; }
+    .card .cw { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: clamp(26px, 3.3vw, 50px); letter-spacing: -0.02em; color: var(--accent); line-height: 1; }
+    .card .cb { font-size: clamp(13px, 1.2vw, 16.5px); color: var(--dim); line-height: 1.5; margin-top: 1.4vh; }
+    .card .cp { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 0.95vw, 12.5px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-top: 1.6vh; }
+
+    .tag { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 0.95vw, 12.5px); letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 11px; border: 1px solid var(--line2); border-radius: 3px; color: var(--dim); }
+    .tag.on { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
+    .pillrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.4vh; }
+
+    .seq { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-family: "JetBrains Mono", monospace; }
+    .tok { display: inline-block; padding: 6px 11px; border: 1px solid var(--line2); border-radius: 4px; font-size: clamp(13px, 1.3vw, 17px); color: var(--dim); background: var(--panel); }
+    .tok.hot { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
+    .tok.out { color: var(--green); border-color: rgba(70, 208, 127, 0.5); background: rgba(70, 208, 127, 0.09); }
+    .tok.arr { border: none; background: none; color: var(--mute); padding: 6px 2px; }
+
+    .bars { display: flex; flex-direction: column; gap: 1.1vh; }
+    .barline { display: grid; grid-template-columns: 10vw 1fr auto; align-items: center; gap: 1vw; font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 1.15vw, 15px); }
+    .barline .nm { color: var(--dim); text-align: right; }
+    .barline .track { height: clamp(13px, 1.7vh, 20px); background: var(--panel); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+    .barline .track > i { display: block; height: 100%; background: var(--mute2); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+    .barline.win .track > i { background: var(--green); }
+    .barline .vv { color: var(--text); min-width: 4ch; }
+    .barline.win .vv { color: var(--green); }
+
+    .stage { position: relative; background: var(--c-bg); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; width: 100%; height: 100%; }
+    .stage::before, .stage::after { content: ""; position: absolute; width: 9px; height: 9px; border-color: var(--accent); border-style: solid; z-index: 3; }
+    .stage::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    .stage::after { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+    .stage canvas { display: block; width: 100%; height: 100%; }
+    .stage .cap { position: absolute; top: 12px; left: 16px; font-family: "JetBrains Mono", monospace; font-size: clamp(9px, 0.9vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); z-index: 2; }
+    .stage .cap b { color: var(--accent); font-weight: 500; }
+    .stage .hint { position: absolute; bottom: 12px; left: 16px; font-family: "JetBrains Mono", monospace; font-size: clamp(9px, 0.85vw, 11px); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); background: rgba(7, 9, 14, 0.72); padding: 4px 9px; border-radius: 4px; border: 1px solid rgba(var(--accent-rgb), 0.35); pointer-events: none; z-index: 2; }
+    .stagewrap { height: 54vh; }
+    .stagewrap.tall { height: 61vh; }
+
+    .ctl { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 1.6vh; }
+    button.btn { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 1.05vw, 13.5px); letter-spacing: 0.1em; text-transform: uppercase; background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 8px 15px; border-radius: 4px; cursor: pointer; transition: background .15s; }
+    button.btn:hover { background: rgba(var(--accent-rgb), 0.12); }
+    button.btn.ghost { color: var(--dim); border-color: var(--line2); }
+    button.btn.ghost:hover { color: var(--text); border-color: var(--mute); }
+    button.btn.on { background: rgba(var(--accent-rgb), 0.16); }
+    .ctl label { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 1vw, 13px); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 10px; }
+    input[type=range] { -webkit-appearance: none; appearance: none; width: clamp(120px, 13vw, 210px); height: 2px; background: var(--line2); outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; background: var(--accent); cursor: pointer; transform: rotate(45deg); box-shadow: 0 0 9px rgba(var(--accent-rgb), 0.6); }
+    input[type=range]::-moz-range-thumb { width: 13px; height: 13px; background: var(--accent); border: none; cursor: pointer; transform: rotate(45deg); }
+    .val { font-family: "JetBrains Mono", monospace; color: var(--accent); min-width: 4ch; }
+
+    .tiles { display: flex; gap: 12px; flex-wrap: wrap; }
+    .tile { flex: 1 1 0; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-left: 2px solid var(--accent); border-radius: 3px; padding: 1.2vh 1vw; }
+    .tile .tl { font-family: "JetBrains Mono", monospace; font-size: clamp(9px, 0.85vw, 11px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--mute); }
+    .tile .tv { font-family: "JetBrains Mono", monospace; font-size: clamp(20px, 2.3vw, 32px); color: var(--text); margin-top: 3px; line-height: 1; }
+
+    #progress { position: fixed; left: 0; bottom: 0; height: 2px; background: var(--accent); width: 0; z-index: 50; transition: width .42s ease; box-shadow: 0 0 8px var(--accent); }
+    #counter { position: fixed; right: 34px; top: 30px; font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--mute); letter-spacing: 0.12em; z-index: 50; }
+    #counter b { color: var(--accent); }
+
+    #rail { position: fixed; left: 34px; bottom: 28px; display: flex; gap: 18px; z-index: 50; font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: 0.16em; }
+    #rail .seg { color: var(--mute2); text-transform: lowercase; display: flex; align-items: center; gap: 8px; transition: color .4s; }
+    #rail .seg::after { content: "○"; font-size: 9px; }
+    #rail .seg.on { text-transform: uppercase; }
+    #rail .seg.s1.on { color: var(--amber); } #rail .seg.s1.on::after { content: "●"; }
+    #rail .seg.s2.on { color: var(--blue); } #rail .seg.s2.on::after { content: "●"; }
+    #rail .seg.s3.on { color: var(--purple); } #rail .seg.s3.on::after { content: "●"; }
+
+    #hint { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--mute2); letter-spacing: 0.1em; z-index: 50; transition: opacity .6s; }
+    #hint.hide { opacity: 0; pointer-events: none; }
+
+    #notes { position: fixed; right: 30px; bottom: 56px; width: min(440px, 42vw); max-height: 52vh; overflow: auto; background: var(--panel2); border: 1px solid var(--line2); border-radius: 6px; padding: 16px 18px; z-index: 60; display: none; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); font-size: 14px; line-height: 1.55; color: var(--dim); }
+    #notes.show { display: block; }
+    #notes h4 { margin: 0 0 8px; font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+    .notes { display: none; }
+
+    /* Engram: entity-assembly table + arch stacks */
+    .reveal { opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
+    .reveal.show { opacity: 1; transform: none; }
+    .erow { display: grid; grid-template-columns: 11ch 1fr; gap: 1.4vw; align-items: baseline; padding: 1.15vh 0; border-bottom: 1px solid var(--line); }
+    .erow .el { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 1vw, 13px); letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+    .erow .ev { font-size: clamp(15px, 1.7vw, 23px); color: var(--dim); }
+    .erow.final { border-bottom: none; }
+    .erow.final .ev { color: var(--accent); font-weight: 600; }
+    .stack { display: flex; flex-direction: column; gap: 6px; }
+    .blk { font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 1.1vw, 14px); padding: 9px 12px; border: 1px solid var(--line2); border-radius: 4px; color: var(--dim); text-align: center; background: var(--panel); }
+    .blk.hot { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
+    .blk.tiny { font-size: 10px; color: var(--mute); border: none; background: none; padding: 2px; }
+    .tok.warm { color: var(--dim); border-color: var(--line2); background: rgba(var(--accent-rgb), 0.06); }
+
+    @media (max-width: 760px) {
+      .cols3 { grid-template-columns: 1fr; } .cols2, .cols2.demo-left { grid-template-columns: 1fr; }
+      #rail { display: none; } .stagewrap { height: 44vh; } .slide { padding: 8vh 7vw 12vh; }
+    }
+    @media (prefers-reduced-motion: reduce) { .slide { transition: opacity .2s; transform: none !important; } .barline .track > i { transition: none; } }
+    @media print {
+      html, body { overflow: visible; height: auto; background: #fff; }
+      .deck { position: static; } #progress, #counter, #rail, #hint, #notes, #frame { display: none !important; }
+      .slide { position: relative; inset: auto; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; }
+      .notes { display: block; margin-top: 12px; color: #333; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="deck" id="deck">
+
+    <!-- ===================== OPEN ===================== -->
+    <section class="slide active" id="s-title" data-act="all" data-accent="blue">
+      <canvas id="hero-cv" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.5"></canvas>
+      <div style="z-index:1">
+        <div class="kicker">a talk in three acts</div>
+        <h1>Less is more.</h1>
+        <div class="lead wide" style="margin-top:3.4vh;max-width:42ch">
+          In this talk, we will look at three interesting techniques: one explores how we can reduce the memory footprint of vectors, another shines light on how geometric constraints can enable training with less data and the last one rethinks the architecture of large models to get more out of the same compute budget.
+          </div>
+      </div>
+      <div class="notes">Open here. The whole talk is one argument: the next leap may not be more scale, but noticing
+        where representations are wasteful, and that waste has exploitable geometric structure. Three papers, three
+        layers (the rail at bottom-left tracks which one we are on). Every demo is live. Drag them.</div>
+    </section>
+
+    <section class="slide" id="s-hook" data-accent="amber">
+      <div class="kicker">the bet that worked</div>
+      <div class="stat">$100M</div>
+      <div class="stat-sub">to train gpt-4</div>
+      <div class="lead wide" style="margin-top:5vh">This shows that scaling worked and the instinct is to keep pouring in more resources. Bigger
+        models, more data, and more GPUs. <b> But there is a lot of room to improve by making things more efficient and effective.</b></div>
+      <div class="notes">The scaling bet was right and paid for itself. But "bigger" is not the only axis. Set up the
+        turn: instead of adding capacity, find where the model is wasteful. Hold on the number for a beat.</div>
+    </section>
+
+    <section class="slide" id="s-reframe" data-act="all">
+      <div class="kicker" style="color:var(--text)">the diagnosis</div>
+      <h2 class="wide" style="margin-bottom:1.2vh">Cost in three directions</h2>
+      <div class="cols3">
+        <div class="card" data-accent="amber" style="--accent:var(--amber);--accent-rgb:245,166,35;border-top:2px solid var(--amber)">
+          <div class="cl">cost 01 · inference</div>
+          <div class="cw">Memory</div>
+          <div class="cb">The KV cache grows with every token.</div>
+          <div class="cp">TurboQuant, DRIVE, EDEN, RaBitQ</div>
+        </div>
+        <div class="card" data-accent="blue" style="--accent:var(--blue);--accent-rgb:109,176,245;border-top:2px solid var(--blue)">
+          <div class="cl">cost 02 · training</div>
+          <div class="cw">Data</div>
+          <div class="cb">Training seems to want a mountain of examples.</div>
+          <div class="cp">semantic tube</div>
+        </div>
+        <div class="card" data-accent="purple" style="--accent:var(--purple);--accent-rgb:167,139,250;border-top:2px solid var(--purple)">
+          <div class="cl">cost 03 · architecture</div>
+          <div class="cw">Depth</div>
+          <div class="cb">Layers go to rebuilding facts.</div>
+          <div class="cp">engram</div>
+        </div>
+      </div>
+      <div class="notes">The spine, stated once. Three costs everyone treats as fixed: memory, data, depth. Each is an
+        artifact of a default setup, not a requirement, and the fix is structure already in the model. Each act takes
+        one cost and shows the cost was never necessary.</div>
+    </section>
+
+    <!-- ===================== ACT I - TURBOQUANT / STORAGE ===================== -->
+    <section class="slide" id="s-kv" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div>
+          <h2>The KV cache eats your memory.</h2>
+          <div class="lead">The first cost is memory. To write each token, attention reads every earlier one, so the
+            model caches a key and a value per token, per layer, per head. That pile grows with the
+            context.</div>
+          <div class="footer-note">Served at scale, memory requirement for KV cache can pass the weights. However, the attention mechanism only cares about
+            <b>inner product</b> between key and query <b>vectors</b>.</div>
+        </div>
+        <div class="stagewrap">
+          <div class="stage">
+            <span class="cap"><b>KV CACHE</b> vs MODEL WEIGHTS</span>
+            <canvas id="kv-cv"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="ctl"><label>context length <input id="kv-len" type="range" min="0" max="100" value="38"><span class="val" id="kv-lenv">8k</span></label></div>
+      <div class="notes">Frame the cost. The cache is linear in context and at long context it passes the weights.
+        INT4 is the obvious 4x win. Tee up why it fails: outliers. Slide the context to show the crossover.</div>
+    </section>
+
+    <section class="slide" id="s-quant" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap" id="quant-cap"><b>4 bits</b> = 16 levels</span><canvas id="quant-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>Vector Quantization: what does quantize even mean?</h2>
+          <div class="lead">Round each number to the nearest of a few fixed levels. Each bit doubles them: two bits
+            give four, four bits give sixteen. The gap is the error you pay.</div>
+          <div class="ctl" id="quant-bits" style="margin-bottom:0.2vh"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button><button class="btn on" data-bits="4">4 bit</button></div>
+          <div class="ctl"><label>value <input id="quant-v" type="range" min="0" max="100" value="63"><span class="val" id="quant-vv">0.00</span></label></div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile"><div class="tl">stored value</div><div class="tv" id="quant-stored">0.00</div></div>
+            <div class="tile" style="border-left-color:var(--red)"><div class="tl">rounding error</div><div class="tv" id="quant-err" style="color:var(--red)">0.00</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">Ground the primitive: quantizing is rounding to the nearest of 4, 8, or 16 levels. Drag the
+        value, watch it snap, see the error. Then name the disease (a real key is spiky) and the cure (rotate). Next
+        slide answers the obvious worry: are we even allowed to rotate?</div>
+    </section>
+
+    <section class="slide" id="s-widegrid" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap" id="wg-cap"><b>ONE GRID</b> · 16 levels for every coordinate</span><canvas id="wg-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>A fixed grid is only as good as its widest coordinate.</h2>
+          <div class="lead">Real key and query vectors are lopsided. Whatever budget of levels you pick, they all have to stretch up to that one outlier, so the small coordinates collapse onto the bottom and round to almost nothing. More bits cannot fix a bad shape.</div>
+          <div class="ctl" id="wg-bits"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">levels</span><button class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button><button class="btn on" data-bits="4">4 bit</button><label style="margin-left:1.2vw">outlier size <input id="wg-out" type="range" min="0" max="100" value="55"><span class="val" id="wg-outv">16x</span></label></div>
+          <div class="tiles" style="margin-top:1.4vh">
+            <div class="tile" style="border-left-color:var(--red)"><div class="tl">small coords lost</div><div class="tv" id="wg-lost" style="color:var(--red)">0 / 15</div></div>
+            <div class="tile"><div class="tl">levels actually used</div><div class="tv" id="wg-used">16 / 16</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">So the fix is not more bits. It is to change the vector's shape before rounding.</div>
+      <div class="notes">The bridge from quantizing to rotating. One fixed grid serves the whole vector, so its level spacing is set by the largest coordinate. On a lopsided real key, the outlier stretches the grid and the small coordinates round to the same level, indistinguishable. Grow the outlier and watch the small coordinates get lost and the used levels collapse toward two. The point: you cannot bit your way out of a bad shape, so reshape the vector first. The tool is a rotation, which is the next slide.</div>
+    </section>
+
+    <section class="slide" id="s-rotate" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div>
+          <h2>Vector rotation to the rescue!</h2>
+          <div class="lead">Rotation leaves every inner product unchanged between vectors, so as far as the attention mechanism is concerned, the dot product looks the same. But rotation has a massive advantage which you will see next.</div>
+          <div class="card" style="margin-top:2vh;padding:1.8vh 1.4vw">
+            <div class="cl">attention score, rotated</div>
+            <div class="mono" style="font-size:clamp(15px,1.7vw,22px);color:var(--text);margin-top:0.6vh">(Rq)·(Rk) = q·(RᵀR)k = q·k</div>
+          </div>
+        </div>
+        <div class="stagewrap">
+          <div class="stage">
+            <span class="cap"><b>ROTATE</b> both vectors · score holds</span>
+            
+            <canvas id="dot-cv"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="ctl"><label>rotation angle <input id="dot-ang" type="range" min="0" max="100" value="20"><span class="val" id="dot-angv">0°</span></label>
+        <div class="tiles" style="flex:0 0 auto"><div class="tile" style="min-width:160px"><div class="tl">inner product q·k</div><div class="tv" id="dot-ip">0.00</div></div></div>
+      </div>
+      <div class="footer-note">This technique of using vector rotation to make well-formed key and query vectors appears in various literature: DRIVE (arXiv 2105.08339), EDEN (2108.08842), and RaBitQ (2405.12497).</div>
+      <div class="notes">The license, placed before the dimension demos. Rotation preserves inner products (free, the
+        model cannot tell) and length (energy can only spread, not grow). Demo: spin q and k, the dot product holds.
+        The next three slides deliver on the promise that the energy spreads: 2D, then 3D, then high-D.</div>
+    </section>
+
+    <section class="slide" id="s-spin2d" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>TURNING A SPIKE</b> · 2 dimensions</span><canvas id="spin-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>Vector rotation moves the energy.</h2>
+          <div class="lead">Let's start with a 2-D vector at (1,0), then rotate it so it points partway along both axes. Neither coordinate is spiky anymore, because the same fixed length has been spread across both coordinates.</div>
+          <div class="ctl"><label>turn <input id="spin-a" type="range" min="0" max="100" value="0"><span class="val" id="spin-av">0°</span></label></div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">first coordinate</div><div class="tv" id="spin-c0" style="color:var(--green)">1.00</div></div>
+            <div class="tile" style="border-left-color:var(--blue)"><div class="tl">second coordinate</div><div class="tv" id="spin-c1" style="color:var(--blue)">0.00</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">The mechanism, in the simplest case. A spike at (1,0) turned by 45 degrees becomes
+        (0.71, 0.71): the tall coordinate drops as the length pours into the other axis. This is exactly what a
+        rotation does, and the next slides show it in three dimensions, then why high dimensions force it, then a
+        real 64-dimensional key.</div>
+    </section>
+
+    <section class="slide" id="s-spin3d" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>SPIKE IN 3D</b> · (1,0,0) rotated</span><canvas id="spin3d-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>Now let's look at a three-dimensional vector</h2>
+          <div class="lead">The spike starts on x₁. A rotation splits its size across all three coordinates, drawn as the bars, and the length never moves.</div>
+          <div class="stage" style="height:16vh;margin-top:1.1vh"><canvas id="spin3d-bars"></canvas></div>
+          <div class="ctl"><button class="btn" id="spin3d-go">fresh rotation</button>
+            <div class="tiles" style="flex:1 1 auto">
+              <div class="tile"><div class="tl">biggest coordinate</div><div class="tv" id="spin3d-mx">1.00</div></div>
+              <div class="tile" style="border-left-color:var(--green)"><div class="tl">length</div><div class="tv" id="spin3d-len" style="color:var(--green)">1.00</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">A typical coordinate is about 1/√3, near 0.58.</div>
+      <div class="notes">The 2D to high-D bridge, lifted from the explainer's §3 spike-in-3D demo. Start on the spike,
+        click fresh rotation, and watch the size split across x₁, x₂, x₃ while the length readout holds at 1.00. Drag
+        the tip to steer it, orbit to look around. The 1/√3 line on the bars previews the concentration argument: more
+        dimensions, smaller typical coordinate.</div>
+    </section>
+
+    <section class="slide" id="s-concentrate" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>ONE COORDINATE</b> of a random direction</span><canvas id="conc-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>What coordinates would look like in many more dimensions</h2>
+          <div class="lead">Push the dimension up and a single coordinate collapses onto one narrow bell, and it is the same bell for every coordinate, whatever the key was. So every coordinate now follows one known distribution.</div>
+          <div class="ctl"><label>dimension <input id="conc-d" type="range" min="1" max="10" value="6"><span class="val" id="conc-dv">64</span></label></div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile"><div class="tl">typical coordinate</div><div class="tv" id="conc-std">0.00</div></div>
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">1 / √d</div><div class="tv" id="conc-isqd" style="color:var(--green)">0.00</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">The why behind the flattening, the concentration demo from the explainer. A random rotation
+        is a random point on a sphere; the fixed length is shared across d coordinates, so a typical one is about
+        1/√d. Raise d and the distribution of a single coordinate collapses toward zero. That is why
+        high-dimensional keys have no real outliers once you rotate.</div>
+    </section>
+
+    <section class="slide" id="s-outlier" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <h2 class="wide" style="margin-bottom:0.5vh">Imagine a key or query vector in 64 dimensions.</h2>
+      <div class="footer-note" style="margin:0 0 1.2vh">On a real key or query vector, there can be outlier values in only a few dimensions. Quantizing these spiky vectors is highly ineffective as shown before. Therefore, we are rotating the vectors to make the values spread out and then we will effectively quantize where the majority of values lie.</div>
+      <div class="row" style="gap:2vw;height:32vh">
+        <div class="grow" style="height:100%">
+          <div class="stage" style="height:100%"><span class="cap"><b>BEFORE Π</b> · |xᵢ|</span><canvas id="rot-before"></canvas></div>
+        </div>
+        <div class="grow" style="height:100%">
+          <div class="stage" style="height:100%"><span class="cap"><b>AFTER Π</b> · |(Πx)ᵢ|</span><canvas id="rot-after"></canvas></div>
+        </div>
+      </div>
+      <div class="ctl">
+        <label>input <select id="rot-input" style="font-family:'JetBrains Mono',monospace;background:var(--panel);color:var(--accent);border:1px solid var(--line2);border-radius:4px;padding:6px 10px;font-size:13px"><option value="spike">spike</option><option value="outlier" selected>outlier channel</option><option value="gaussian">gaussian</option></select></label>
+        <label>rotate <input id="rot-t" type="range" min="0" max="100" value="100"><span class="val" id="rot-tv">100%</span></label>
+        <button class="btn" id="rot-go">fresh rotation</button>
+        <div class="tiles" style="flex:0 1 auto">
+          <div class="tile"><div class="tl">biggest |coord|</div><div class="tv"><span id="rot-bmax">0.00</span> → <span id="rot-amax">0.00</span></div></div>
+          <div class="tile" style="border-left-color:var(--green)"><div class="tl">length, unchanged</div><div class="tv" id="rot-norm" style="color:var(--green);font-size:clamp(13px,1.4vw,20px)">1.00 → 1.00</div></div>
+        </div>
+      </div>
+      <div class="notes">The problem and the tax. Left: a real key, energy piled into one or two outlier channels. The
+        standard fix (KIVI/GPTQ/AWQ) stores per-block min/max in fp16, a header tax, plus calibration. TurboQuant
+        refuses both and takes two moves. Drag rotate to preview move one; the right panel spreads while the length
+        readout holds. The next slides explain why it works and why it is allowed.</div>
+    </section>
+
+    <section class="slide" id="s-codebook" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap" id="cb-cap"><b>2-bit codebook</b> · levels on the bell</span><canvas id="cb-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>Quantization codebook for that bell shape.</h2>
+          <div class="lead">Because every coordinate now follows the same known bell, quantize the levels where the bell is dense. It is data-free, one tiny table reused for every key, with no calibration.</div>
+          <div class="ctl" id="cb-bits" style="margin-bottom:0.2vh"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button class="btn ghost" data-bits="1">1 bit</button><button class="btn on" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button></div>
+          <div class="tiles" style="margin-top:1.4vh">
+            <div class="tile"><div class="tl">levels</div><div class="tv" id="cb-L">4</div></div>
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">gap to optimal</div><div class="tv" id="cb-sh" style="color:var(--green);font-size:clamp(16px,1.7vw,24px)">≈2.7x</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">Move two, the real contribution. Because the post-rotation marginal is one known density, Lloyd-Max solves once for the optimal levels: dense in the middle, sparse in the tails. One tiny table, no calibration, no per-block headers. Drag bits to watch the levels re-pack. Hardcoded Lloyd-Max centroids for the unit Gaussian.</div>
+    </section>
+
+    <section class="slide" id="s-bias" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>RECONSTRUCTION</b> ỹ vs y · the tails get capped</span><canvas id="bias-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>But it lies about inner products.</h2>
+          <div class="lead">Rounding sends each coordinate to its bin's average, which sits closer to zero, so the key comes back shrunk. That is fine for reconstruction, but an inner product with a shrunk key comes out too small, the same way every time, and averaging cannot fix a bias.</div>
+          <div class="ctl" id="bias-bits" style="margin-bottom:0.2vh"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button class="btn on" data-bits="1">1 bit</button><button class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button></div>
+          <div class="tiles" style="margin-top:1.4vh">
+            <div class="tile" style="border-left-color:var(--red)"><div class="tl">inner product kept</div><div class="tv" id="bias-lam" style="color:var(--red)">0.64</div></div>
+            <div class="tile"><div class="tl">should be</div><div class="tv">1.00</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">At one bit the score keeps only 2/π, about 0.64 of its value, on every key. So reconstruction solved one problem, and the inner product is a different one.</div>
+      <div class="notes">The bias, the heart of the paper. The MSE-optimal decode is the bin mean, which sits closer to 0 than the inputs, so the reconstruction is a shrunken copy. The staircase shows ỹ(y) sitting inside the identity line: shrinkage. The inner-product multiplier is λ_b = E[ỹ²]/σ² (0.64 / 0.88 / 0.97 for b=1,2,3). Same factor every trial, so averaging does not help.</div>
+    </section>
+
+    <section class="slide" id="s-qjl" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>INNER-PRODUCT ESTIMATE</b> · truth = 1.00</span><canvas id="qjl-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>One bit makes it honest.</h2>
+          <div class="lead">The leftover gap is the residual. Keep only its sign, which is one bit, and since we know the average size of such a gap in advance, the sign says which way to nudge and the size says how far. Add it back and the bias cancels. Any single estimate is noisier, but the average is exactly right.</div>
+          <div class="ctl"><button class="btn" id="qjl-run">fire 1500 trials</button><button class="btn ghost" id="qjl-reset">reset</button></div>
+          <div class="tiles" style="margin-top:1.4vh">
+            <div class="tile" style="border-left-color:var(--red)"><div class="tl">round only · mean</div><div class="tv" id="qjl-mse" style="color:var(--red)">0.64</div></div>
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">+ residual bit · mean</div><div class="tv" id="qjl-qjl" style="color:var(--green)">1.00</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">Same one bit, the difference is where it is spent. The biased mean parks at 0.64; the corrected one reaches the truth.</div>
+      <div class="notes">QJL, the un-biaser. Fire trials: the round-only estimate clusters tightly but its mean sits at 0.64 (biased, never moves). The +residual-bit estimate scatters wider but its running mean converges to 1.00 (unbiased, higher variance). Bias vs variance, made visible. This is TurboQuant-prod.</div>
+    </section>
+
+    <section class="slide" id="s-recipe" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <h2 class="wide" style="margin-bottom:2.6vh">The whole thing, in three steps.</h2>
+      <div class="row" style="gap:1.4vw;align-items:stretch;max-width:82vw">
+        <div class="card" style="flex:1 1 0;border-top:2px solid var(--amber)"><div class="cl">step 1 · rotate</div><div class="cw" style="font-size:clamp(22px,2.6vw,38px)">Πx</div><div class="cb" style="margin-top:1vh">Every coordinate takes the same known shape.</div></div>
+        <div class="card" style="flex:1 1 0;border-top:2px solid var(--amber)"><div class="cl">step 2 · round</div><div class="cw" style="font-size:clamp(22px,2.6vw,38px)">B−1 bits</div><div class="cb" style="margin-top:1vh">Snap each coordinate to the one codebook built for that shape.</div></div>
+        <div class="card" style="flex:1 1 0;border-top:2px solid var(--green)"><div class="cl">step 3 · correct</div><div class="cw" style="font-size:clamp(22px,2.6vw,38px);color:var(--green)">+1 bit</div><div class="cb" style="margin-top:1vh">Spend the last bit on the residual's sign, so the inner product is unbiased.</div></div>
+      </div>
+      <div class="notes">The recap, breathing on its own slide. Three steps: rotate (free, prior art), round with the universal codebook (b-1 bits), correct with one sign bit (QJL). One scalar per vector, the residual norm, versus a header per block elsewhere. Say "rotate, round, correct" and move to the receipt.</div>
+    </section>
+
+    <section class="slide" id="s-shannon" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>DISTORTION</b> vs bits · log scale</span><canvas id="shan-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>How close to the best possible?</h2>
+          <div class="lead">Information theory sets a floor no quantizer can beat: error cannot fall below 4 to the minus b. TurboQuant lands about 2.7x above it, 1.5x at one bit. And its error falls like 4 to the minus b, exponential in bits, where older sketches only improved like 1/b.</div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">gap to optimal</div><div class="tv" id="shan-gap" style="color:var(--green);font-size:clamp(16px,1.7vw,24px)">≈2.7x</div></div>
+            <div class="tile"><div class="tl">rate</div><div class="tv">4⁻ᵇ</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">Exponential in the bits, and proven for every bit-width. That near-optimality is what TurboQuant genuinely adds, and it is why a handful of bits is enough.</div>
+      <div class="notes">Near-optimality. Shannon floor 4^-b (gold), TurboQuant (sqrt(3)π/2)·4^-b ≈ 2.7x above and parallel (amber), old data-free sketch ~1/b which starts close but falls behind fast (red). Log y-axis, so a constant gap is a constant vertical offset. Same exponential slope as the floor is the point.</div>
+    </section>
+
+    <!-- <section class="slide" id="s-tqresults" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <div class="rule"></div>
+      <h2 class="wide">4x smaller. Accuracy intact.</h2>
+      <div class="footer-note" style="margin:0.6vh 0 1.4vh">Quality-neutral down to 3.5 bits, marginal at 2.5. And with
+        no calibration, the same recipe wins again in vector search, beating product quantization at near-zero indexing time.</div>
+      <div class="bars" id="tq-bars" style="margin-top:1vh;max-width:62vw">
+        <div class="barline"><span class="nm">SnapKV</span><span class="track"><i data-v="86"></i></span><span class="vv">0.858</span></div>
+        <div class="barline"><span class="nm">PyramidKV</span><span class="track"><i data-v="90"></i></span><span class="vv">0.895</span></div>
+        <div class="barline"><span class="nm">KIVI</span><span class="track"><i data-v="98"></i></span><span class="vv">0.981</span></div>
+        <div class="barline"><span class="nm">PolarQuant</span><span class="track"><i data-v="99.5"></i></span><span class="vv">0.995</span></div>
+        <div class="barline"><span class="nm">Full FP16</span><span class="track"><i data-v="99.7"></i></span><span class="vv">0.997</span></div>
+        <div class="barline win"><span class="nm">TurboQuant</span><span class="track"><i data-v="99.7"></i></span><span class="vv">0.997</span></div>
+      </div>
+      <div class="footer-note">Needle in a haystack · Llama-3.1-8B-Instruct · 4k to 104k tokens · 4x compression</div>
+      <div class="notes">The receipt. TurboQuant at 4x matches full precision (0.997) and beats every other KV
+        compressor. Bars animate in. Let the green TurboQuant row land last.</div>
+    </section> -->
+
+    <!-- <section class="slide" id="s-tqpunch" data-act="storage" data-accent="amber">
+      <div class="kicker">part 01 · storage</div>
+      <h2 class="wide" style="font-size:clamp(28px,4.8vw,68px);max-width:26ch">A key was always a few bits. You paid for
+        the <span class="acc">packaging:</span> the wrong basis, an untuned codebook, an estimator that shrank every score.</h2>
+      <div class="footer-note">TurboQuant · Zandieh, Daliri, Hadian, Mirrokni · arXiv 2504.19874</div>
+      <div class="notes">Land Act I. The content was never the problem. The coordinate system was. Pause, then pivot:
+        same shape of mistake shows up in training.</div>
+    </section> -->
+
+    <!-- ===================== ACT II - SEMANTIC TUBE / LEARNING ===================== -->
+    <section class="slide" id="s-scaling" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div>
+          <h2>Can we train with less data?</h2>
+          <div class="lead">The second cost is data. A scaling law says you need a mountain of it, which looks like
+            the price of quality. But what if we impose geometric constraints in the loss function which conditions the training to be more well-behaved and makes the best of the available data?</div>
+        </div>
+        <div class="stagewrap">
+          <div class="stage">
+            <span class="cap"><b>LOSS</b> vs DATA · log scale</span>
+            
+            <canvas id="scale-cv"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="ctl"><label>data budget <input id="scale-d" type="range" min="6" max="100" value="78"><span class="val" id="scale-dv">1.0x</span></label>
+        <div class="tiles" style="flex:0 0 auto"><div class="tile" style="min-width:200px"><div class="tl">data for same loss, +STP</div><div class="tv" id="scale-save" style="color:var(--blue)">1/16</div></div></div>
+      </div>
+      <div class="notes">Set the stakes. The power law is not destiny, it describes one objective. STP shifts the
+        curve left. Slide the budget: the blue curve reaches the same loss far earlier.</div>
+    </section>
+
+    <section class="slide" id="s-conflate" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <h2 class="wide">Next-token prediction cannot tell signal from noise.</h2>
+      <div style="margin-top:1vh">
+        <div class="seq" style="margin-bottom:1.4vh"><span class="tok" style="border:none;background:none;color:var(--mute);width:9ch">same meaning</span>
+          <span class="tok">the</span><span class="tok">capital</span><span class="tok">of</span><span class="tok">france</span><span class="tok">is</span><span class="tok out">paris</span></div>
+        <div class="seq"><span class="tok" style="border:none;background:none;color:var(--mute);width:9ch">same meaning</span>
+          <span class="tok">france</span><span class="tok">'s</span><span class="tok">capital</span><span class="tok">city</span><span class="tok">is</span><span class="tok out">paris</span></div>
+      </div>
+      <div class="cols2" style="margin-top:3vh;max-width:64vw">
+        <div class="card" style="border-top:2px solid var(--blue)"><div class="cl">the snr problem</div><div class="cb" style="margin-top:0">Surface form carries no meaning, yet every word gets the same loss weight as the answer. The signal sits under a pile of noise.</div></div>
+        <div class="card" style="border-top:2px solid var(--blue)"><div class="cl">exposure bias</div><div class="cb" style="margin-top:0">Training reads the true prefix. Generation reads its own output. The two drift apart, and the drift compounds.</div></div>
+      </div>
+      <div class="notes">Two sentences, one meaning. NTP treats every surface token as a separate target, so it spends
+        capacity memorizing word order. Plus exposure bias. Both point to the same cure: constrain the trajectory,
+        not the tokens.</div>
+    </section>
+
+    <section class="slide" id="s-path" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>HIDDEN STATE</b> · one point per token</span><canvas id="path-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>A sentence is a path.</h2>
+          <div class="lead">Read a token and the hidden state steps to a new point; read the next and it steps again. String those points together and the sentence becomes a path through space, like a walk through a city.</div>
+          <div class="ctl"><button class="btn" id="path-go">read the sentence</button></div>
+        </div>
+      </div>
+      <div class="notes">The foundational picture for the act. Tokens arrive, the hidden state walks point to point,
+        tracing a path. Replay it once. After "sentence equals path", the geodesic and the tube need no extra
+        setup.</div>
+    </section>
+
+    <section class="slide" id="s-step" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>TWO STEPS</b> · the angle between them</span><canvas id="step-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>Two steps, one angle.</h2>
+          <div class="lead">Walk the path two steps at a time, this step and then the next. If you are walking a straight line, the two point the same way, so the angle between them tells the whole story: it is zero on a straight stretch, and it opens up as the path bends.</div>
+          <div class="ctl"><label>bend the path <input id="step-bend" type="range" min="0" max="100" value="52"><span class="val" id="step-bendv">52%</span></label></div>
+          <div class="tiles" style="margin-top:1.4vh">
+            <div class="tile"><div class="tl">angle</div><div class="tv" id="step-ang">0°</div></div>
+            <div class="tile"><div class="tl">1 − cos of the angle</div><div class="tv" id="step-loss">0.00</div></div>
+          </div>
+          <div class="footer-note" style="margin-top:1.4vh">STP measures this between chords from randomly chosen earlier points, so the whole run stays straight, not just neighbors. That is the loss.</div>
+        </div>
+      </div>
+      <div class="notes">The primitive the loss is built on. Two consecutive steps, the angle between them is the bend,
+        and STP's loss is just 1 minus its cosine. Bend the path and watch the number grow. After this, the tube and
+        the gauge on the next slide need no setup.</div>
+    </section>
+
+    <section class="slide" id="s-decomp" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage"><span class="cap"><b>ONE STEP</b> · along vs across</span><canvas id="decomp-cv"></canvas></div>
+        </div>
+        <div>
+          <h2>Signal goes along, noise goes across.</h2>
+          <div class="lead">Split one step against the direction of travel. The part that points <span style="color:var(--green)">along</span> it is real progress, the signal. The part that points <span style="color:var(--red)">across</span> it is wobble that goes nowhere, the noise.</div>
+          <div class="ctl"><label>tilt the step <input id="decomp-a" type="range" min="0" max="100" value="34"><span class="val" id="decomp-av">0°</span></label></div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">signal · along</div><div class="tv" id="decomp-sig" style="color:var(--green)">0.00</div></div>
+            <div class="tile" style="border-left-color:var(--red)"><div class="tl">noise · across</div><div class="tv" id="decomp-noise" style="color:var(--red)">0.00</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">A straight path is all along and nothing across. That is why it is the low-noise one. Every bit of across is data the model has to fit and then average away.</div>
+      <div class="notes">The definition of signal and noise, made geometric, lifted from the explainer's primer. One step
+        splits against the direction of travel: the along part is progress (green, signal), the across part is wobble
+        (red, noise). Tilt the step and the across part grows. A straight path has zero across, so it is the only
+        low-noise one. This is exactly the split the tube enforces on the next slide.</div>
+    </section>
+
+    <section class="slide" id="s-tube" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <div class="row top" style="gap:2vw;height:64vh">
+        <div class="grow" style="display:flex;flex-direction:column;height:100%">
+          <h2 style="margin-bottom:1vh">The clean path is a straight line.</h2>
+          <div class="lead" style="font-size:clamp(14px,1.4vw,19px);margin-bottom:1.4vh">This is the geodesic
+            hypothesis: the clean path is straight. Each step splits into <span style="color:var(--green)">signal
+            along it</span> and <span style="color:var(--red)">noise across it</span>.</div>
+          <div class="stage" style="flex:1 1 auto;min-height:0">
+            <span class="cap"><b>SEMANTIC TUBE</b> · drag h_r</span>
+            
+            <canvas id="tube3d-cv"></canvas>
+          </div>
+        </div>
+        <div style="flex:0 0 27vw;display:flex;flex-direction:column;gap:1.4vh">
+          <div class="stage" style="height:30vh"><span class="cap"><b>L_STP</b> meter</span><canvas id="tube-gauge"></canvas></div>
+          <div id="tube-status" class="card" style="margin:0;padding:1.4vh 1vw;font-size:14px;border-top:2px solid var(--green)">In the tube. Pure signal, loss near zero.</div>
+          <div class="tiles"><div class="tile" style="border-left-color:var(--green)"><div class="tl">signal</div><div class="tv" id="tube-sig" style="color:var(--green)">0.00</div></div>
+            <div class="tile" style="border-left-color:var(--red)"><div class="tl">noise</div><div class="tv" id="tube-noise" style="color:var(--red)">0.00</div></div></div>
+          <div class="ctl" style="margin:0"><button class="btn" id="tube-train">auto-train</button><label>tube ε<input id="tube-eps" type="range" min="0.12" max="0.55" step="0.01" value="0.30"></label></div>
+        </div>
+      </div>
+      <div class="notes">The core intuition. The loss is one cosine: how much consecutive steps bend. Drag h_r off the
+        axis and the red noise vector grows while the gauge climbs green to red. Auto-train shows the gradient pulling
+        it back into the tube. This is the whole method, made physical.</div>
+    </section>
+
+    <section class="slide" id="s-objective" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <h2 class="wide" style="margin-bottom:1.2vh">It is one extra term in the loss.</h2>
+      <div class="footer-note" style="margin:0 0 2vh">STP comes from JEPA, Yann LeCun's idea of predicting in representation space instead of in tokens. The tube is that idea for language, and it needs none of JEPA's usual machinery.</div>
+      <div class="card" style="margin:0 0 2.2vh;padding:1.8vh 1.4vw;max-width:62vw">
+        <div class="cl">the whole objective</div>
+        <div class="mono" style="font-size:clamp(16px,1.9vw,26px);color:var(--text);margin-top:0.8vh">L = L<sub>NTP</sub> &nbsp;+&nbsp; λ · L<sub>STP</sub><span style="color:var(--mute);font-size:0.66em">&nbsp;&nbsp;( 1 − cos of the bend )</span></div>
+      </div>
+      <div class="cols2" style="max-width:74vw">
+        <div class="card" style="border-top:2px solid var(--mute)"><div class="cl">what jepa usually needs</div><div class="cb" style="margin-top:0.4vh">Two augmented views of the input, a separate predictor network, and an extra forward pass.</div></div>
+        <div class="card" style="border-top:2px solid var(--blue)"><div class="cl">what the tube needs</div><div class="cb" style="margin-top:0.4vh">One cosine on the model's own trajectory. No second view, no predictor. And λ is zero at inference, so it costs nothing to run.</div></div>
+      </div>
+      <div class="notes">The method, and the JEPA framing the paper is named for. STP is a JEPA-style regularizer for
+        language: predict in representation space, but using the sequence's own trajectory instead of two augmented
+        views. The full objective is just L_NTP + λ·L_STP with λ ≈ 0.01 to 0.08. No predictor network (identity is
+        optimal under the geodesic hypothesis), no extra forward pass, cheaper than the group's earlier LLM-JEPA. And
+        λ = 0 at inference, so zero runtime cost. One term, no new machinery.</div>
+    </section>
+
+    <section class="slide" id="s-collapse" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap tall">
+          <div class="stage">
+            <span class="cap"><b>INFERENCE CONE</b> · two meanings</span>
+            
+            <canvas id="cone-cv"></canvas>
+          </div>
+        </div>
+        <div>
+          <h2>Wobble kills diversity.</h2>
+          <div class="lead">Two close meanings are two paths, and clean paths behave like smooth flows that never
+            cross. But generation feeds on its own output, so noise compounds, fanning each path into a widening
+            cone. Turn STP off, the cones overlap and the two meanings collapse into one. Turn it on, the wobble
+            shrinks and they stay distinct.</div>
+          <div class="ctl"><button class="btn on" id="cone-stp">STP: on, distinct</button><label>noise σ<input id="cone-sig" type="range" min="0.1" max="0.9" step="0.01" value="0.7"></label></div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile"><div class="tl">crossing over</div><div class="tv" id="cone-p">0%</div></div>
+            <div class="tile" style="border-left-color:var(--green)"><div class="tl">distinct meanings</div><div class="tv" id="cone-sep" style="color:var(--green)">2 / 2</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">The diversity story. Toggle STP off: the two ensembles bleed together and merge to one mode
+        collapse. On: the cones tighten and stay separated. This is why straightness preserves diversity.</div>
+    </section>
+
+    <section class="slide" id="s-oneknob" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <div class="rule"></div>
+      <h2 style="margin-bottom:0.6vh">One knob moves the whole chain.</h2>
+      <div class="footer-note" style="margin:0 0 1.6vh">Less wobble means less noise, and with less noise each example
+        carries more signal, so you need fewer of them.</div>
+      <div class="stage" style="height:26vh"><span class="cap"><b>TRAJECTORY</b> · wobbly to geodesic</span><canvas id="fuse-path"></canvas></div>
+      <div class="tiles" style="margin-top:1.6vh">
+        <div class="tile" style="border-left-color:var(--blue)"><div class="tl">L_STP minimized</div><div class="tv" id="fuse-loss">0.45</div></div>
+        <div class="tile" style="border-left-color:var(--blue)"><div class="tl">signal / noise</div><div class="tv" id="fuse-snr">0.3</div></div>
+        <div class="tile" style="border-left-color:var(--blue)"><div class="tl">data to match</div><div class="tv" id="fuse-data">15.6x</div></div>
+        <div class="tile" style="border-left-color:var(--green)"><div class="tl">accuracy @ fixed budget</div><div class="tv" id="fuse-acc" style="color:var(--green)">20%</div></div>
+      </div>
+      <div class="ctl"><button class="btn" id="fuse-play">train with STP</button><label>training <input id="fuse-slider" type="range" min="0" max="100" value="0"><span class="val" id="fuse-sliderv">0%</span></label>
+        <span class="footer-note" id="fuse-punch" style="margin:0">Raw training: low SNR, you would need ~16x the data.</span></div>
+      <div class="notes">The money slide. Drag training to the right: path straightens, loss falls, SNR climbs, data
+        needed drops to one sixteenth, accuracy rises to the full-data line. The entire thesis in one gesture.
+        Illustrative numbers, calibrated to the paper's 16x.</div>
+    </section>
+
+    <!-- <section class="slide" id="s-stppunch" data-act="learning" data-accent="blue">
+      <div class="kicker">part 02 · learning</div>
+      <h2 class="wide" style="font-size:clamp(30px,5.2vw,76px);max-width:26ch">Most of what next-token training works so
+        hard to fit is <span class="acc">wobble that averages out.</span> Straighten the path and that work disappears.</h2>
+      <div class="footer-note">Semantic Tube Prediction · Huang, LeCun, Balestriero · arXiv 2602.22617</div>
+      <div class="notes">Land Act II. NTP wastes data fitting noise orthogonal to the geodesic. Straighten the path
+        and the data requirement collapses. Pivot to compute: the model also wastes whole layers.</div>
+    </section> -->
+
+    <!-- ===================== ACT III - ENGRAM / COMPUTE ===================== -->
+    <section class="slide" id="s-lookup" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <div class="rule"></div>
+      <div class="cols2">
+        <div>
+          <h2>Transformers do lookup through computation.</h2>
+          <div class="lead">The third cost is depth. To recall one static fact the model rebuilds it layer after
+            layer, which looks like the price of knowledge. It is depth spent on something that never changes.</div>
+          <div class="footer-note">"Diana, Princess of Wales" is a fixed entry. Six layers should not be its price.
+            <br>Illustrative trace; source: PatchScopes, Ghandeharioun et al. 2024.</div>
+        </div>
+        <div id="etable">
+          <div class="erow reveal"><span class="el">layer 1</span><span class="ev">Wales</span></div>
+          <div class="erow reveal"><span class="el">layer 3</span><span class="ev">A country in europe</span></div>
+          <div class="erow reveal"><span class="el">layer 4</span><span class="ev">Princess of Wales (unspecific)</span></div>
+          <div class="erow reveal"><span class="el">layer 5</span><span class="ev">Title for the wife of the Prince of Wales</span></div>
+          <div class="erow reveal final"><span class="el">layer 6</span><span class="ev">Diana, Princess of Wales</span></div>
+        </div>
+      </div>
+      <div class="notes">The waste, shown directly. PatchScopes reads each layer: the model assembles a known entity
+        step by step. That is compute spent reconstructing a lookup. Rows reveal one per layer, like the model
+        discovering it.</div>
+    </section>
+
+    <section class="slide" id="s-sparse" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <div class="rule"></div>
+      <h2 class="wide" style="margin-bottom:2.4vh">Two ways to spend less compute.</h2>
+      <div class="cols2" style="max-width:74vw">
+        <div class="card" style="border-top:2px solid var(--mute)">
+          <div class="cl">conditional compute · moe</div>
+          <div class="cb" style="margin-top:0.6vh">For each token, route to a few experts out of many, so the model picks which weights to run. This part is already standard.</div>
+        </div>
+        <div class="card" style="border-top:2px solid var(--purple)">
+          <div class="cl">conditional memory · engram</div>
+          <div class="cb" style="margin-top:0.6vh">For each token, fetch a few rows from a huge table, so the model picks which memories to recall, with no matrix multiply, just a read.</div>
+        </div>
+      </div>
+      <div class="footer-note">A fact you can look up should not cost a full expert. Engram puts the second kind of
+        sparsity next to the first.</div>
+      <div class="notes">Frame the new axis. MoE chooses which computation to run. Engram chooses which memory to
+        read. They are complements. The next slides show how Engram does the read and how to balance the two.</div>
+    </section>
+
+    <section class="slide" id="s-engram" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <div class="rule"></div>
+      <h2 class="wide" style="margin-bottom:2vh">So add memory you can recall instead of recompute.</h2>
+      <div class="cols2" style="align-items:flex-start">
+        <div class="row" style="gap:2vw;align-items:stretch">
+          <div class="stack grow">
+            <div class="blk tiny">Standard MoE</div>
+            <div class="blk">Tokens</div><div class="blk">Attention</div><div class="blk">MoE FFN</div>
+            <div class="blk">Attention</div><div class="blk">MoE FFN</div>
+            <div class="blk tiny" style="color:var(--red)">Early depth rebuilds entities</div>
+          </div>
+          <div class="stack grow">
+            <div class="blk tiny">Engram</div>
+            <div class="blk">Tokens</div><div class="blk hot">Engram memory</div><div class="blk">Attention</div>
+            <div class="blk">MoE FFN</div><div class="blk">Attention</div>
+            <div class="blk tiny" style="color:var(--green)">Lookup first, depth freed to reason</div>
+          </div>
+        </div>
+        <div class="stack" style="gap:1.2vh">
+          <div class="card" style="border-top:2px solid var(--purple)"><div class="cl">1 · retrieve</div><div class="cb" style="margin-top:0">Hash the last 2-gram and 3-gram into a giant embedding table. O(1) lookup, no compute.</div></div>
+          <div class="card" style="border-top:2px solid var(--purple)"><div class="cl">2 · gate</div><div class="cb" style="margin-top:0">A context-aware gate suppresses retrievals that do not fit, so noise never enters the stream.</div></div>
+          <div class="card" style="border-top:2px solid var(--purple)"><div class="cl">3 · inject</div><div class="cb" style="margin-top:0">Add it to the running representation at layer 2, before reconstruction would have begun.</div></div>
+        </div>
+      </div>
+      <div class="footer-note">Tables run 5.7B to 18.5B params, offloaded to host DRAM. Deterministic lookup means
+        async prefetch, under 3% throughput cost.</div>
+      <div class="notes">The fix. Memory is a third sparsity axis alongside MoE. Retrieve the static pattern by hash,
+        gate it, inject early. The big table lives in cheap host memory, prefetched, so it is nearly free at
+        inference.</div>
+    </section>
+
+    <section class="slide" id="s-ucurve" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage">
+            <span class="cap"><b>VAL LOSS</b> vs compute split</span>
+            
+            <canvas id="ucurve-cv"></canvas>
+          </div>
+        </div>
+        <div>
+          <h2>The sparsity sweet spot.</h2>
+          <div class="lead">Split the budget between Engram lookup and MoE experts. Lean too far toward MoE and you waste early layers on facts; lean too far toward Engram and you starve the reasoning. In between, the loss traces a U.</div>
+          <div class="ctl"><label>moe share <input id="uc-rho" type="range" min="0" max="100" value="30"><span class="val" id="uc-rhov">30%</span></label></div>
+          <div class="tiles" style="margin-top:1.6vh">
+            <div class="tile"><div class="tl">val loss</div><div class="tv" id="uc-loss">0.00</div></div>
+            <div class="tile"><div class="tl">regime</div><div class="tv" id="uc-reg" style="font-size:clamp(14px,1.5vw,20px)">too little moe</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">At the floor, Engram-27B beats an iso-param iso-FLOPs MoE baseline everywhere, with the
+        biggest gains on reasoning, code, and math.</div>
+      <div class="notes">Drag to the bottom of the U, around 75 to 80% MoE. The point: memory and conditional
+        compute are complements, not rivals. The win shows up most on reasoning, not just recall, because depth is
+        freed.</div>
+    </section>
+
+    <section class="slide" id="s-deeper" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <div class="rule"></div>
+      <div class="cols2 demo-left">
+        <div class="stagewrap">
+          <div class="stage">
+            <span class="cap"><b>CKA</b> · engram vs moe layers</span>
+            <canvas id="cka-cv"></canvas>
+          </div>
+        </div>
+        <div>
+          <h2>It makes the network effectively deeper.</h2>
+          <div class="lead">Freed from rebuilding entities, Engram reaches deep representations earlier. Its layer 5
+            already matches a plain MoE layer 12.</div>
+          <div class="tiles" style="margin-top:1.4vh">
+            <div class="tile"><div class="tl">engram L5 matches moe</div><div class="tv">L12</div></div>
+          </div>
+          <div class="footer-note" style="margin-top:1.8vh">The gate fires on multi-token entities and set phrases, even though it was never trained to. That behavior just emerges.</div>
+          <div class="seq" style="margin-top:1vh">
+            <span class="tok">only</span><span class="tok warm">alexander</span><span class="tok">the</span><span class="tok warm">great</span><span class="tok">tamed</span><span class="tok warm">bucephalus</span>
+          </div>
+        </div>
+      </div>
+      <div class="notes">CKA aligns Engram and MoE layers. The bright diagonal sits above the true diagonal: shallow
+        Engram layers equal deeper MoE layers. Plus the gate lights up on named entities and idioms, an emergent
+        behavior. Effectively a deeper model at the same cost.</div>
+    </section>
+
+    <section class="slide" id="s-engramresults" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <div class="rule"></div>
+      <h2 class="wide">The gains land where you would not expect.</h2>
+      <div class="footer-note" style="margin:0.4vh 0 1.4vh">Engram-27B against an iso-param, iso-FLOPs MoE baseline. Built to help knowledge recall, but the bigger jumps are in reasoning and code.</div>
+      <div class="bars" id="engram-bars" style="margin-top:0.5vh;max-width:64vw">
+        <div class="barline"><span class="nm">MMLU · knowledge</span><span class="track"><i data-v="54"></i></span><span class="vv">+3.4</span></div>
+        <div class="barline"><span class="nm">HumanEval · code</span><span class="track"><i data-v="48"></i></span><span class="vv">+3.0</span></div>
+        <div class="barline"><span class="nm">ARC · reasoning</span><span class="track"><i data-v="59"></i></span><span class="vv">+3.7</span></div>
+        <div class="barline win"><span class="nm">BBH · reasoning</span><span class="track"><i data-v="80"></i></span><span class="vv">+5.0</span></div>
+      </div>
+      <div class="footer-note">And by freeing attention for global context, long-context retrieval jumps most of all: multi-query needle 84.2 → 97.0.</div>
+      <div class="notes">The receipt, mirroring Act I's s-tqresults. Built for knowledge (MMLU +3.4, CMMLU +4.0) but the
+        larger gains are reasoning (BBH +5.0, ARC +3.7) and code/math (HumanEval +3.0, MATH +2.4), because freeing the
+        early layers helps reasoning most. Long-context NIAH 84.2 to 97.0. Let the green BBH row land last.</div>
+    </section>
+
+    <!-- <section class="slide" id="s-engrampunch" data-act="compute" data-accent="purple">
+      <div class="kicker">part 03 · compute</div>
+      <h2 class="wide" style="font-size:clamp(30px,5.2vw,76px);max-width:24ch">Reading a fact from a table is one
+        lookup. Rebuilding it through attention is <span class="acc">many layers.</span> So Engram just reads.</h2>
+      <div class="footer-note" style="margin-bottom:1.4vh">Again, the cost was in the method, not the task. A fact you can look up should never cost a layer of compute.</div>
+      <div class="footer-note">Engram · Cheng, Zeng, Dai et al. · DeepSeek &amp; Peking University · arXiv 2601.07372</div>
+      <div class="notes">Land Act III. Retrieve the statics, compute the dynamics. Same FLOPs, effectively more
+        depth. Now pull the three together.</div>
+    </section> -->
+
+    <!-- ===================== SYNTHESIS ===================== -->
+    <section class="slide" id="s-three" data-act="all">
+      <div class="kicker" style="color:var(--text)">Wrapping up</div>
+      <h2 class="wide" style="margin-bottom:2.4vh">Three directions</h2>
+      <div style="display:flex;flex-direction:column;gap:1.2vh;max-width:80vw">
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;font-family:'JetBrains Mono',monospace;font-size:clamp(9px,0.9vw,11.5px);letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);padding:0 1vw">
+          <span>paper</span><span>the cost everyone pays</span><span>the fix</span><span>the win</span>
+        </div>
+        <div class="card" style="padding:1.8vh 1vw;border-left:3px solid var(--amber);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+          <span style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--amber)">DRIVE, EDEN, RaBitQ, TurboQuant</span>
+          <span class="cb" style="margin:0">Keys stored in more bits than required</span>
+          <span class="cb" style="margin:0">Rotate, then quantize, push in the right direction</span>
+          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less space to store</span>
+        </div>
+        <div class="card" style="padding:1.8vh 1vw;border-left:3px solid var(--blue);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+          <span style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--blue)">Semantic Tube</span>
+          <span class="cb" style="margin:0">Training fits surface noise as signal</span>
+          <span class="cb" style="margin:0">Enforce the geodesic</span>
+          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less data to train</span>
+        </div>
+        <div class="card" style="padding:1.8vh 1vw;border-left:3px solid var(--purple);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+          <span style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--purple)">Engram</span>
+          <span class="cb" style="margin:0">Layers rebuild static facts</span>
+          <span class="cb" style="margin:0">Retrieve, then reason</span>
+          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Short-circuit model depth</span>
+        </div>
+      </div>
+      <div class="notes">The receipts side by side. Same column shape: a waste, a geometric fix, a multiplier. Three
+        layers of the stack, three teams, no shared citations.</div>
+    </section>
+
+    <!-- <section class="slide" id="s-thread" data-act="all">
+      <div class="kicker" style="color:var(--text)">the common thread</div>
+      <h2 class="wide" style="margin-bottom:3vh">Look at what each one actually did.</h2>
+      <div style="display:flex;flex-direction:column;gap:1.8vh;max-width:48ch">
+        <div class="lead" style="max-width:none"><span style="color:var(--amber)">TurboQuant</span> rotates the keys into a basis they already fit.</div>
+        <div class="lead" style="max-width:none"><span style="color:var(--blue)">Semantic Tube</span> follows the straight path the clean states already trace.</div>
+        <div class="lead" style="max-width:none"><span style="color:var(--purple)">Engram</span> reads the fact straight from a table.</div>
+      </div>
+      <h2 class="wide acc" style="margin-top:4vh;color:var(--text);font-size:clamp(26px,3.6vw,52px)">None of it was new.
+        The model was already holding it.</h2>
+      <div class="footer-note">A better basis, a straighter path, a stored fact. In every case the cost came from the
+        method, not the task.</div>
+      <div class="notes">The thesis in one line. Every result is the same shape: the model was paying to recompute
+        structure that the representation already contained. Find it, exploit it, stop paying.</div>
+    </section> -->
+
+    <!-- <section class="slide" id="s-close" data-act="all" data-accent="blue">
+      <canvas id="close-cv" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.45"></canvas>
+      <div style="z-index:1">
+        <div class="kicker">Wrap</div>
+        <h1 style="font-size:clamp(34px,5.6vw,86px)">Representations are doing <span class="acc">too much work.</span></h1>
+        <div class="lead wide" style="margin-top:3vh;max-width:44ch">The model you already have is holding more than it
+          uses. That gap is where the next win is, before you go train a bigger one.</div>
+        <div class="footer-note" style="margin-top:3.4vh">Play with the demos:
+          arkaung.github.io/interactive-turboquant · interactive-semantic-tube</div>
+      </div>
+      <div class="notes">Close. Bring it home: scale is one axis, but understanding waste is another, and it is
+        cheaper. Point to the live explainers. Thank the audience.</div>
+    </section> -->
+
+    <!-- BUILD:SLIDES -->
+
+  </div>
+
+  <div id="frame"><i class="f-tl"></i><i class="f-tr"></i><i class="f-bl"></i><i class="f-br"></i></div>
+  <div id="progress"></div>
+  <div id="rail">
+    <span class="seg s1">storage</span>
+    <span class="seg s2">learning</span>
+    <span class="seg s3">compute</span>
+  </div>
+  <div id="counter"><b id="cnum">1</b> / <span id="ctot">1</span></div>
+  <div id="hint">arrows or space to move · N notes · F fullscreen</div>
+  <div id="notes"><h4>presenter notes</h4><div id="notes-body"></div></div>
+
+  <script>
+    /* ============================ SHARED HELPER LIBRARY ============================ */
+    const THEME = { c: {} };
+    function refreshTheme() {
+      const cs = getComputedStyle(document.documentElement);
+      const g = n => cs.getPropertyValue(n).trim();
+      THEME.c = {
+        bg: g('--c-bg'), grid: g('--c-grid'), gridSoft: g('--c-grid-soft'), axis: g('--c-axis'),
+        text: g('--c-text'), dim: g('--c-dim'), mute: g('--c-mute'), line: g('--line'),
+        amber: g('--amber'), blue: g('--blue'), purple: g('--purple'), green: g('--green'), red: g('--red')
+      };
+    }
+    refreshTheme();
+    function rgba(hex, a) { const h = hex.replace('#', ''); const r = parseInt(h.slice(0, 2), 16), gg = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16); return 'rgba(' + r + ',' + gg + ',' + b + ',' + a + ')'; }
+
+    let _seed = 1234567;
+    function srand() { _seed = (_seed * 1103515245 + 12345) & 0x7fffffff; return _seed / 0x7fffffff; }
+    function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+    function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function sub(a, b) { return a.map((v, i) => v - b[i]); }
+    function add(a, b) { return a.map((v, i) => v + b[i]); }
+    function scale(a, s) { return a.map(v => v * s); }
+    function dot(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
+    function norm(a) { return Math.sqrt(dot(a, a)); }
+    function normalize(a) { const n = norm(a) || 1e-9; return a.map(v => v / n); }
+    function cosSim(a, b) { const na = norm(a), nb = norm(b); if (na < 1e-9 || nb < 1e-9) return 0; return dot(a, b) / (na * nb); }
+    function projPar(a, b) { const nb2 = dot(b, b) || 1e-9; return scale(b, dot(a, b) / nb2); }
+    function projPerp(a, b) { return sub(a, projPar(a, b)); }
+    function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+    function erf(x) { const s = x < 0 ? -1 : 1; x = Math.abs(x); const t = 1 / (1 + 0.3275911 * x); const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return s * y; }
+    function normCDF(z) { return 0.5 * (1 + erf(z / Math.SQRT2)); }
+    /* high-D rotation helpers, lifted from interactive-turboquant */
+    function norm2(v) { let s = 0; for (let i = 0; i < v.length; i++) s += v[i] * v[i]; return Math.sqrt(s); }
+    function gaussVec(d) { const v = new Float64Array(d); for (let i = 0; i < d; i++) v[i] = gauss(); return v; }
+    function randomRotation(d) { const rows = []; for (let i = 0; i < d; i++) { let v = gaussVec(d); for (let j = 0; j < i; j++) { let c = 0; for (let k = 0; k < d; k++) c += v[k] * rows[j][k]; for (let k = 0; k < d; k++) v[k] -= c * rows[j][k]; } let n = norm2(v); if (n < 1e-12) { i--; continue; } for (let k = 0; k < d; k++) v[k] /= n; rows.push(v); } return rows; }
+    function matVec(R, x) { const d = x.length, y = new Float64Array(d); for (let i = 0; i < d; i++) { let s = 0; const r = R[i]; for (let j = 0; j < d; j++) s += r[j] * x[j]; y[i] = s; } return y; }
+    function makeInput(type, d) { const x = new Float64Array(d); if (type === 'spike') { x[0] = 1; } else if (type === 'outlier') { x[0] = 3; for (let i = 1; i < d; i++) x[i] = gauss() * 0.3; } else { for (let i = 0; i < d; i++) x[i] = gauss(); } const n = norm2(x) || 1; for (let i = 0; i < d; i++) x[i] /= n; return x; }
+    function drawBarsTQ(canvas, data, opts) { const { ctx, w, h } = setupCanvas(canvas); clearCanvas(ctx, w, h); const pad = { l: 12, r: 12, t: 16, b: 16 }; const ymax = opts.ymax || Math.max(1e-6, ...data.map(Math.abs)); const n = data.length, bw = (w - pad.l - pad.r) / n, plotH = h - pad.t - pad.b, y0 = h - pad.b; ctx.strokeStyle = THEME.c.axis; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(w - pad.r, y0); ctx.stroke(); ctx.fillStyle = 'rgb(' + opts.rgb + ')'; for (let i = 0; i < n; i++) { const v = Math.abs(data[i]); const x = pad.l + i * bw; const hh = v / ymax * plotH; ctx.fillRect(x + 0.5, y0 - hh, Math.max(1, bw - 1), hh); } }
+
+    function setupCanvas(cv) {
+      const dpr = window.devicePixelRatio || 1;
+      const r = cv.getBoundingClientRect();
+      const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+      cv.width = w * dpr; cv.height = h * dpr;
+      const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, w, h };
+    }
+    function makeView(w, h, pad, xmin, xmax, ymin, ymax) {
+      const p = Object.assign({ l: 44, r: 20, t: 22, b: 32 }, pad || {});
+      const iw = w - p.l - p.r, ih = h - p.t - p.b;
+      return { p, iw, ih, xmin, xmax, ymin, ymax, X: x => p.l + (x - xmin) / (xmax - xmin) * iw, Y: y => p.t + (1 - (y - ymin) / (ymax - ymin)) * ih };
+    }
+    function clearCanvas(ctx, w, h) { ctx.clearRect(0, 0, w, h); }
+    function drawGrid(ctx, V, w, h, o) {
+      o = o || {}; ctx.save(); ctx.strokeStyle = THEME.c.gridSoft; ctx.lineWidth = 1;
+      const nx = o.nx || 8, ny = o.ny || 6; ctx.beginPath();
+      for (let i = 0; i <= nx; i++) { const x = V.p.l + i / nx * V.iw; ctx.moveTo(x, V.p.t); ctx.lineTo(x, V.p.t + V.ih); }
+      for (let j = 0; j <= ny; j++) { const y = V.p.t + j / ny * V.ih; ctx.moveTo(V.p.l, y); ctx.lineTo(V.p.l + V.iw, y); }
+      ctx.stroke(); ctx.restore();
+    }
+    function drawFrame(ctx, V, w, h, o) {
+      o = o || {}; ctx.save(); ctx.strokeStyle = THEME.c.axis; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(V.p.l, V.p.t); ctx.lineTo(V.p.l, V.p.t + V.ih); ctx.lineTo(V.p.l + V.iw, V.p.t + V.ih); ctx.stroke();
+      ctx.fillStyle = THEME.c.mute; ctx.font = '12px "JetBrains Mono", monospace';
+      if (o.xlabel) { ctx.textAlign = 'right'; ctx.fillText(o.xlabel, V.p.l + V.iw, V.p.t + V.ih + 24); }
+      if (o.ylabel) { ctx.save(); ctx.translate(13, V.p.t + V.ih / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText(o.ylabel, 0, 0); ctx.restore(); }
+      ctx.restore();
+    }
+    function arrow(ctx, x0, y0, x1, y1, color, lw, head) {
+      head = head == null ? 9 : head; ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw || 2;
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+      const a = Math.atan2(y1 - y0, x1 - x0); ctx.beginPath(); ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 - head * Math.cos(a - 0.42), y1 - head * Math.sin(a - 0.42));
+      ctx.lineTo(x1 - head * Math.cos(a + 0.42), y1 - head * Math.sin(a + 0.42));
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    function dotAt(ctx, x, y, r, color, ring) { ctx.save(); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); if (ring) { ctx.strokeStyle = ring; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(x, y, r + 3.5, 0, 7); ctx.stroke(); } ctx.restore(); }
+    function dashed(ctx, x0, y0, x1, y1, color, lw, d) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 1; ctx.setLineDash(d || [4, 4]); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.restore(); }
+    function label(ctx, x, y, t, color, o) { o = o || {}; ctx.save(); ctx.font = o.font || '12px "JetBrains Mono", monospace'; ctx.textAlign = o.align || 'left'; ctx.fillStyle = color; ctx.fillText(t, x, y); ctx.restore(); }
+    function polyline(ctx, V, pts, color, lw, d) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 2; if (d) ctx.setLineDash(d); ctx.beginPath(); pts.forEach((p, i) => { const x = V.X(p[0]), y = V.Y(p[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.restore(); }
+
+    /* 3D engine */
+    function make3D(yaw, pitch) {
+      const cam = { yaw: yaw == null ? 0.6 : yaw, pitch: pitch == null ? -0.32 : pitch, s: 1, cx: 0, cy: 0 };
+      cam.setView = (w, h, frac, yShift) => { cam.s = Math.min(w, h) * (frac || 0.32); cam.cx = w / 2; cam.cy = h / 2 + (yShift || 0); };
+      cam.proj = p => { const cY = Math.cos(cam.yaw), sY = Math.sin(cam.yaw), cP = Math.cos(cam.pitch), sP = Math.sin(cam.pitch); let x = p[0] * cY + p[2] * sY; let z = -p[0] * sY + p[2] * cY; let y = p[1] * cP - z * sP; z = p[1] * sP + z * cP; return { x: cam.cx + x * cam.s, y: cam.cy - y * cam.s, depth: z }; };
+      cam.unproject = (u, v, z2) => { const cY = Math.cos(cam.yaw), sY = Math.sin(cam.yaw), cP = Math.cos(cam.pitch), sP = Math.sin(cam.pitch); const z1 = z2 * cP - v * sP; const py = v * cP + z2 * sP; const px = u * cY - z1 * sY; const pz = u * sY + z1 * cY; return [px, py, pz]; };
+      cam.cz2 = vec => { const sY = Math.sin(cam.yaw), cY = Math.cos(cam.yaw), sP = Math.sin(cam.pitch), cP = Math.cos(cam.pitch); const z1 = -vec[0] * sY + vec[2] * cY; return vec[1] * sP + z1 * cP; };
+      cam.dragTo = (px, py, ref) => cam.unproject((px - cam.cx) / cam.s, -(py - cam.cy) / cam.s, cam.cz2(ref));
+      return cam;
+    }
+    function attachOrbit(canvas, cam, render, opts) {
+      opts = opts || {}; let mode = null, lx = 0, ly = 0;
+      const at = e => { const r = canvas.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; return { px: t.clientX - r.left, py: t.clientY - r.top, cx: t.clientX, cy: t.clientY }; };
+      function start(e) { const { px, py, cx, cy } = at(e); if (opts.getTipPx) { const tp = opts.getTipPx(); if (tp) { const dx = px - tp.x, dy = py - tp.y; if (dx * dx + dy * dy <= 20 * 20) { mode = 'tip'; opts.onDrag(px, py); return; } } } mode = 'orbit'; lx = cx; ly = cy; }
+      function move(e) { if (!mode) return; if (mode === 'tip') { const { px, py } = at(e); opts.onDrag(px, py); } else { const { cx, cy } = at(e); cam.yaw += (cx - lx) * 0.01; cam.pitch = clamp(cam.pitch + (cy - ly) * 0.01, -1.3, 1.3); lx = cx; ly = cy; render(); } }
+      function end() { if (mode === 'tip' && opts.onEnd) opts.onEnd(); mode = null; }
+      canvas.addEventListener('mousedown', start); window.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+      canvas.addEventListener('touchstart', e => { start(e); if (mode) e.preventDefault(); }, { passive: false });
+      canvas.addEventListener('touchmove', e => { if (mode) { move(e); e.preventDefault(); } }, { passive: false });
+      window.addEventListener('touchend', end);
+    }
+    function line3(ctx, cam, A, B, color, lw, d) { const a = cam.proj(A), b = cam.proj(B); if (d) { dashed(ctx, a.x, a.y, b.x, b.y, color, lw, d); return; } ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 2; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore(); }
+    function arrow3(ctx, cam, A, B, color, lw, head) { const a = cam.proj(A), b = cam.proj(B); arrow(ctx, a.x, a.y, b.x, b.y, color, lw || 2, head); }
+    function dot3(ctx, cam, P, r, color, ring) { const p = cam.proj(P); dotAt(ctx, p.x, p.y, r, color, ring); return p; }
+    function polyline3(ctx, cam, pts, color, lw, d) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = lw || 2; if (d) ctx.setLineDash(d); ctx.beginPath(); pts.forEach((P, i) => { const p = cam.proj(P); i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); }); ctx.stroke(); ctx.restore(); }
+    function tube3D(ctx, cam, A, B, radius, rgb, o) {
+      o = o || {}; const axis = normalize(sub(B, A)); let up = Math.abs(axis[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+      const e1 = normalize(cross(axis, up)), e2 = normalize(cross(axis, e1)); const RINGS = o.rings || 18, SEG = o.seg || 28; const rings = [];
+      for (let i = 0; i <= RINGS; i++) { const c = add(A, scale(sub(B, A), i / RINGS)); const pts = []; for (let j = 0; j <= SEG; j++) { const a = j / SEG * 6.283; const off = add(scale(e1, Math.cos(a) * radius), scale(e2, Math.sin(a) * radius)); pts.push(cam.proj(add(c, off))); } let md = 0; pts.forEach(p => md += p.depth); rings.push({ pts, depth: md / pts.length }); }
+      rings.sort((a, b) => a.depth - b.depth);
+      rings.forEach(r => { const t = clamp((r.depth + 1.6) / 3.2, 0, 1); ctx.save(); ctx.strokeStyle = 'rgba(' + rgb + ',' + (0.10 + 0.26 * t).toFixed(3) + ')'; ctx.lineWidth = 1; ctx.beginPath(); r.pts.forEach((p, k) => k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke(); ctx.restore(); });
+    }
+    function drawGauge(ctx, cx, cy, R, value, o) {
+      o = o || {}; const vmax = o.max || 2, t = clamp(value / vmax, 0, 1), A0 = 135 * Math.PI / 180, SW = 270 * Math.PI / 180, SEG = 72;
+      const zone = v => v / vmax < 0.18 ? THEME.c.green : v / vmax < 0.42 ? THEME.c.amber : THEME.c.red;
+      ctx.save(); ctx.lineCap = 'round';
+      for (let i = 0; i < SEG; i++) { const a0 = A0 + i / SEG * SW, a1 = A0 + (i + 1) / SEG * SW; ctx.strokeStyle = zone((i + 0.5) / SEG * vmax); ctx.globalAlpha = (i / SEG <= t) ? 0.95 : 0.16; ctx.lineWidth = R * 0.17; ctx.beginPath(); ctx.arc(cx, cy, R, a0, a1); ctx.stroke(); }
+      ctx.globalAlpha = 1; const ang = A0 + t * SW, col = zone(value); ctx.strokeStyle = col; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(ang) * R * 0.82, cy + Math.sin(ang) * R * 0.82); ctx.stroke();
+      dotAt(ctx, cx, cy, 5, col); ctx.fillStyle = col; ctx.font = '700 ' + Math.round(R * 0.42) + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.fillText(value.toFixed(2), cx, cy + R * 0.46);
+      ctx.fillStyle = THEME.c.mute; ctx.font = Math.round(R * 0.13) + 'px "JetBrains Mono", monospace'; ctx.fillText(o.label || '', cx, cy + R * 0.46 + R * 0.2); ctx.restore(); ctx.textAlign = 'left';
+    }
+
+    /* ============================ SLIDE ENGINE ============================ */
+    const hooks = {};
+    function regSlide(id, o) { hooks[id] = o; }
+    let SLIDES = [], cur = 0;
+    function chrome() {
+      const s = SLIDES[cur];
+      document.getElementById('cnum').textContent = cur + 1;
+      document.getElementById('progress').style.width = ((cur + 1) / SLIDES.length * 100) + '%';
+      const act = s.getAttribute('data-act');
+      document.querySelectorAll('#rail .seg').forEach(seg => seg.classList.remove('on'));
+      if (act === 'storage') document.querySelector('#rail .s1').classList.add('on');
+      else if (act === 'learning') document.querySelector('#rail .s2').classList.add('on');
+      else if (act === 'compute') document.querySelector('#rail .s3').classList.add('on');
+      else if (act === 'all') document.querySelectorAll('#rail .seg').forEach(seg => seg.classList.add('on'));
+      const nb = document.getElementById('notes-body'); const nt = s.querySelector('.notes');
+      nb.innerHTML = nt ? nt.innerHTML : '<i style="color:var(--mute)">no notes</i>';
+    }
+    function goTo(n) {
+      n = clamp(n, 0, SLIDES.length - 1); if (n === cur && SLIDES[cur].classList.contains('active')) return;
+      const prev = SLIDES[cur];
+      prev.classList.remove('active');
+      if (hooks[prev.id] && hooks[prev.id].leave) hooks[prev.id].leave();
+      cur = n; const s = SLIDES[cur]; s.classList.add('active');
+      if (hooks[s.id] && hooks[s.id].enter) hooks[s.id].enter();
+      chrome();
+      if (window.MathJax && MathJax.typesetPromise && !s._typeset) { s._typeset = true; MathJax.typesetPromise([s]).catch(() => { }); }
+    }
+    function next() { goTo(cur + 1); } function prev() { goTo(cur - 1); }
+    window.addEventListener('DOMContentLoaded', () => {
+      SLIDES = [...document.querySelectorAll('.slide')];
+      document.getElementById('ctot').textContent = SLIDES.length;
+      SLIDES.forEach((s, i) => { if (!s.id) s.id = 'slide-' + i; });
+      window.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+        else if (e.key === 'Home') goTo(0);
+        else if (e.key === 'End') goTo(SLIDES.length - 1);
+        else if (e.key.toLowerCase() === 'n') document.getElementById('notes').classList.toggle('show');
+        else if (e.key.toLowerCase() === 'f') { if (!document.fullscreenElement) document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); else document.exitFullscreen && document.exitFullscreen(); }
+      });
+      /* click-to-advance removed: slides move only on keyboard (space / arrows), so clicks and drags on the demos never flip the slide */
+      let sx = 0; document.addEventListener('touchstart', e => sx = e.touches[0].clientX, { passive: true });
+      document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) (dx < 0 ? next : prev)(); }, { passive: true });
+      setTimeout(() => document.getElementById('hint').classList.add('hide'), 4500);
+      const h = parseInt(location.hash.replace('#', ''));
+      SLIDES[0].classList.add('active');
+      if (h > 0 && h <= SLIDES.length) { cur = 0; goTo(h - 1); }
+      else { if (hooks[SLIDES[0].id] && hooks[SLIDES[0].id].enter) hooks[SLIDES[0].id].enter(); chrome(); if (window.MathJax && MathJax.typesetPromise) { SLIDES[0]._typeset = true; MathJax.typesetPromise([SLIDES[0]]).catch(() => { }); } }
+    });
+    window.addEventListener('resize', () => { const s = SLIDES[cur]; if (s && hooks[s.id] && hooks[s.id].resize) hooks[s.id].resize(); });
+
+    /* ===================== HERO ambient ===================== */
+    regSlide('s-title', (function () {
+      const cv = document.getElementById('hero-cv'); let raf = null, t = 0;
+      const cols = ['245,166,35', '109,176,245', '167,139,250'];
+      const lines = []; _seed = 7;
+      for (let i = 0; i < 5; i++) lines.push({ y: 0.2 + 0.6 * srand(), amp: 0.03 + 0.055 * srand(), freq: 0.6 + 1.2 * srand(), ph: srand() * 6.28, sp: 0.0013 + 0.0015 * srand(), col: cols[i % 3] });
+      function draw() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        lines.forEach(L => {
+          ctx.save(); ctx.strokeStyle = 'rgba(' + L.col + ',0.14)'; ctx.lineWidth = 1.5; ctx.beginPath();
+          for (let px = 0; px <= w; px += 8) { const u = px / w; const y = (L.y + L.amp * Math.sin(u * 6.28 * L.freq + L.ph + t * L.sp * 18)) * h; px ? ctx.lineTo(px, y) : ctx.moveTo(px, y); }
+          ctx.stroke();
+          const u = (t * L.sp * 0.28) % 1, px = u * w, y = (L.y + L.amp * Math.sin(u * 6.28 * L.freq + L.ph + t * L.sp * 18)) * h;
+          ctx.fillStyle = 'rgba(' + L.col + ',0.42)'; ctx.beginPath(); ctx.arc(px, y, 2.4, 0, 7); ctx.fill(); ctx.restore();
+        });
+      }
+      function loop() { t++; draw(); raf = requestAnimationFrame(loop); }
+      return { enter() { if (!raf) loop(); }, leave() { if (raf) cancelAnimationFrame(raf); raf = null; }, resize() { draw(); } };
+    })());
+
+    const $ = id => document.getElementById(id);
+    const T_ = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+
+    /* ===================== A1 - KV vs weights ===================== */
+    regSlide('s-kv', (function () {
+      const cv = $('kv-cv'); let v = 38;
+      function ctxLen(x) { return Math.round(1000 * Math.pow(2, x / 100 * 8)); }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const T = ctxLen(v), weights = 140, kv = T / 1000 * 0.6;
+        const ymax = Math.max(weights, kv) * 1.18;
+        const V = makeView(w, h, { l: 54, r: 24, t: 40, b: 46 }, 0, 1, 0, ymax);
+        drawFrame(ctx, V, w, h, { ylabel: 'GB' });
+        const bw = V.iw * 0.26;
+        function bar(cx, val, col, name) {
+          const x = V.p.l + cx * V.iw - bw / 2, y = V.Y(val), y0 = V.Y(0);
+          ctx.fillStyle = col; ctx.fillRect(x, y, bw, y0 - y);
+          ctx.fillStyle = THEME.c.text; ctx.font = '600 16px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+          ctx.fillText(Math.round(val) + ' GB', x + bw / 2, y - 10);
+          ctx.fillStyle = THEME.c.mute; ctx.font = '11px "JetBrains Mono", monospace';
+          ctx.fillText(name, x + bw / 2, V.p.t + V.ih + 22); ctx.textAlign = 'left';
+        }
+        bar(0.32, weights, rgba(THEME.c.amber, 0.32), 'weights (70B)');
+        const over = kv > weights;
+        bar(0.7, kv, over ? THEME.c.amber : rgba(THEME.c.amber, 0.7), 'kv cache @ ' + label());
+        if (over) { const y = V.Y(weights); dashed(ctx, V.p.l, y, V.p.l + V.iw, y, THEME.c.red, 1.5, [5, 4]); label(ctx, V.p.l + V.iw, y - 8, 'cache > weights', THEME.c.red, { align: 'right' }); }
+      }
+      function label() { const T = ctxLen(v); return T >= 1000 ? Math.round(T / 1000) + 'k' : T; }
+      $('kv-len').oninput = e => { v = +e.target.value; T_('kv-lenv', label()); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== A1a - 2D: turning a spike redistributes energy ===================== */
+    regSlide('s-spin2d', (function () {
+      const cv = $('spin-cv'); let ang = 0;
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 28, r: 28, t: 28, b: 28 }, -1.25, 1.25, -1.25, 1.25);
+        drawGrid(ctx, V, w, h, { nx: 8, ny: 8 });
+        const ox = V.X(0), oy = V.Y(0);
+        const R = Math.min(V.X(1) - ox, oy - V.Y(1));   // one uniform scale so length is preserved
+        dashed(ctx, V.p.l, oy, V.p.l + V.iw, oy, THEME.c.gridSoft, 1, [2, 3]);
+        dashed(ctx, ox, V.p.t, ox, V.p.t + V.ih, THEME.c.gridSoft, 1, [2, 3]);
+        ctx.save(); ctx.strokeStyle = rgba(THEME.c.amber, 0.28); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ox, oy, R, 0, 7); ctx.stroke(); ctx.restore();
+        const x = Math.cos(ang), y = Math.sin(ang);
+        const tx = ox + x * R, ty = oy - y * R;          // arrow tip rides the circle exactly
+        dashed(ctx, tx, ty, tx, oy, THEME.c.mute, 1, [3, 3]);
+        dashed(ctx, tx, ty, ox, ty, THEME.c.mute, 1, [3, 3]);
+        ctx.strokeStyle = THEME.c.green; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(tx, oy); ctx.stroke();
+        ctx.strokeStyle = THEME.c.blue; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, ty); ctx.stroke();
+        arrow(ctx, ox, oy, tx, ty, THEME.c.amber, 2.6);
+        label(ctx, tx, oy + 16, 'x₁', THEME.c.green, { align: 'center' });
+        label(ctx, ox - 16, ty, 'x₂', THEME.c.blue, { align: 'right' });
+        T_('spin-c0', Math.abs(x).toFixed(2)); T_('spin-c1', Math.abs(y).toFixed(2));
+      }
+      $('spin-a').oninput = e => { ang = (+e.target.value) / 100 * (Math.PI / 2); T_('spin-av', Math.round((+e.target.value) / 100 * 90) + '°'); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== A1b - high-D concentration: why coordinates can't be spiky (from interactive-turboquant) ===================== */
+    regSlide('s-concentrate', (function () {
+      const cv = $('conc-cv'); let logd = 6;
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const dim = Math.pow(2, logd), N = 2600, bins = 70, lo = -1, hi = 1;
+        const hist = new Float64Array(bins); let sum = 0, sum2 = 0;
+        for (let i = 0; i < N; i++) {
+          const g = gaussVec(dim); let n2 = 0; for (let j = 0; j < dim; j++) n2 += g[j] * g[j];
+          const x = g[0] / Math.sqrt(n2); sum += x; sum2 += x * x;
+          const b = Math.floor((x - lo) / (hi - lo) * bins); if (b >= 0 && b < bins) hist[b]++;
+        }
+        let mx = 0; for (let i = 0; i < bins; i++) if (hist[i] > mx) mx = hist[i];
+        const pad = { l: 24, r: 18, t: 30, b: 30 }, iw = w - pad.l - pad.r, ih = h - pad.t - pad.b, bw = iw / bins;
+        ctx.fillStyle = rgba(THEME.c.amber, 0.55);
+        for (let i = 0; i < bins; i++) { const bh = hist[i] / mx * ih; ctx.fillRect(pad.l + i * bw, h - pad.b - bh, Math.max(1, bw - 1), bh); }
+        ctx.strokeStyle = THEME.c.axis; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(pad.l, h - pad.b); ctx.lineTo(w - pad.r, h - pad.b); ctx.stroke();
+        ctx.fillStyle = THEME.c.mute; ctx.font = '11px "JetBrains Mono",monospace'; ctx.textAlign = 'center';
+        for (let v = -1; v <= 1.001; v += 0.5) { const px = pad.l + ((v - lo) / (hi - lo)) * iw; ctx.fillText(v.toFixed(1), px, h - 10); }
+        ctx.textAlign = 'left';
+        const s = 1 / Math.sqrt(dim);
+        [-s, s].forEach(v => { const px = pad.l + ((v - lo) / (hi - lo)) * iw; dashed(ctx, px, pad.t, px, h - pad.b, THEME.c.green, 1.5, [4, 4]); });
+        const pxs = pad.l + ((s - lo) / (hi - lo)) * iw; label(ctx, pxs + 5, pad.t + 12, '±1/√d', THEME.c.green, { font: '11px "JetBrains Mono",monospace' });
+        const mean = sum / N, sd = Math.sqrt(Math.max(0, sum2 / N - mean * mean));
+        T_('conc-std', sd.toFixed(3)); T_('conc-isqd', s.toFixed(3));
+      }
+      $('conc-d').oninput = e => { logd = +e.target.value; T_('conc-dv', Math.pow(2, logd)); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== A2 - rotation spreads the energy (lifted from interactive-turboquant) ===================== */
+    regSlide('s-outlier', (function () {
+      const cA = $('rot-before'), cB = $('rot-after'); if (!cA || !cB) return {};
+      const D = 64; let R = null, x = null, Rx = null, t = 1;
+      // slerp keeps the vector on the unit sphere, so a partial "rotate" is a true rotation: length is preserved
+      function slerp(a, b, tt) {
+        let d = 0; for (let i = 0; i < a.length; i++) d += a[i] * b[i]; d = clamp(d, -1, 1);
+        const Om = Math.acos(d); if (Om < 1e-6) return Array.from(a);
+        const s = Math.sin(Om), c0 = Math.sin((1 - tt) * Om) / s, c1 = Math.sin(tt * Om) / s;
+        const out = new Array(a.length); for (let i = 0; i < a.length; i++) out[i] = c0 * a[i] + c1 * b[i]; return out;
+      }
+      function refresh() { x = makeInput($('rot-input').value, D); R = randomRotation(D); Rx = matVec(R, x); render(); }
+      function render() {
+        if (!x) return;
+        const y = slerp(x, Rx, t);
+        const before = Array.from(x, Math.abs), after = y.map(Math.abs);
+        const ymax = Math.max(Math.max(...before), Math.max(...after), 0.001);
+        drawBarsTQ(cA, before, { ymax: ymax, rgb: '245,166,35' });
+        drawBarsTQ(cB, after, { ymax: ymax, rgb: '109,176,245' });
+        T_('rot-bmax', Math.max(...before).toFixed(2));
+        T_('rot-amax', Math.max(...after).toFixed(2));
+        T_('rot-norm', norm2(x).toFixed(2) + ' → ' + norm2(y).toFixed(2));
+      }
+      $('rot-input').onchange = refresh;
+      $('rot-go').onclick = () => { R = randomRotation(D); Rx = matVec(R, x); render(); };
+      $('rot-t').oninput = e => { t = (+e.target.value) / 100; T_('rot-tv', e.target.value + '%'); render(); };
+      return { enter() { refresh(); }, resize() { render(); } };
+    })());
+
+    /* ===================== A1a2 - spike rotation in 3D (from interactive-turboquant §3) ===================== */
+    regSlide('s-spin3d', (function () {
+      const gcv = $('spin3d-cv'), bcv = $('spin3d-bars'); if (!gcv) return {};
+      const cam = make3D(0.7, -0.42); let rv = [1, 0, 0], tip = null;
+      function randUnit3() { const x = gauss(), y = gauss(), z = gauss(); const n = Math.hypot(x, y, z) || 1; return [x / n, y / n, z / n]; }
+      function drawGeom() {
+        const { ctx, w, h } = setupCanvas(gcv); clearCanvas(ctx, w, h);
+        cam.setView(w, h, 0.34, 6);
+        const C = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]];
+        const E = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+        E.forEach(([a, b]) => line3(ctx, cam, C[a], C[b], rgba(THEME.c.amber, 0.15), 1));
+        const ax = [[1.25, 0, 0], [0, 1.25, 0], [0, 0, 1.25]], col = [THEME.c.red, THEME.c.amber, THEME.c.blue], lab = ['x₁', 'x₂', 'x₃'];
+        ax.forEach((p, i) => { line3(ctx, cam, [0, 0, 0], p, col[i], 1, [2, 3]); const P = cam.proj(p); label(ctx, P.x + 4, P.y + 3, lab[i], col[i]); });
+        arrow3(ctx, cam, [0, 0, 0], [1, 0, 0], rgba(THEME.c.amber, 0.45), 2);
+        arrow3(ctx, cam, [0, 0, 0], rv, THEME.c.blue, 2.4);
+        const T = cam.proj(rv); dotAt(ctx, T.x, T.y, 6, THEME.c.blue, rgba(THEME.c.blue, 0.3)); tip = { x: T.x, y: T.y };
+      }
+      function drawBars() {
+        const { ctx, w, h } = setupCanvas(bcv); clearCanvas(ctx, w, h);
+        const pad = { l: 30, r: 16, t: 16, b: 24 }, W = w - pad.l - pad.r, H = h - pad.t - pad.b, y0 = pad.t + H;
+        ctx.strokeStyle = THEME.c.axis; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(pad.l + W, y0); ctx.stroke();
+        const fy = y0 - (1 / Math.sqrt(3)) * H;
+        dashed(ctx, pad.l, fy, pad.l + W, fy, THEME.c.amber, 1, [4, 3]);
+        label(ctx, pad.l + 4, fy - 4, '1/√3 ≈ 0.58', THEME.c.amber, { font: '10px "JetBrains Mono", monospace' });
+        const vals = rv.map(Math.abs), slot = W / 3;
+        vals.forEach((v, i) => {
+          const bw = slot * 0.5, bx = pad.l + i * slot + (slot - bw) / 2, bh = v * H;
+          ctx.fillStyle = rgba(THEME.c.blue, 0.85); ctx.fillRect(bx, y0 - bh, bw, bh);
+          ctx.fillStyle = THEME.c.dim; ctx.font = '10px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.fillText('|x' + (i + 1) + '|', bx + bw / 2, y0 + 14);
+          ctx.fillStyle = THEME.c.text; ctx.fillText(v.toFixed(2), bx + bw / 2, y0 - bh - 4); ctx.textAlign = 'left';
+        });
+      }
+      function draw() { drawGeom(); drawBars(); T_('spin3d-mx', Math.max(...rv.map(Math.abs)).toFixed(2)); T_('spin3d-len', Math.hypot(rv[0], rv[1], rv[2]).toFixed(2)); }
+      function tipDrag(px, py) {
+        const u = (px - cam.cx) / cam.s, v = -(py - cam.cy) / cam.s, r2 = u * u + v * v;
+        const sign = cam.cz2(rv) >= 0 ? 1 : -1;
+        const p = r2 >= 1 ? cam.unproject(u / Math.sqrt(r2), v / Math.sqrt(r2), 0) : cam.unproject(u, v, sign * Math.sqrt(1 - r2));
+        const n = Math.hypot(p[0], p[1], p[2]) || 1; rv = [p[0] / n, p[1] / n, p[2] / n]; draw();
+      }
+      attachOrbit(gcv, cam, draw, { getTipPx: () => tip, onDrag: tipDrag });
+      $('spin3d-go').onclick = () => { rv = randUnit3(); draw(); };
+      return { enter() { draw(); }, resize() { draw(); } };
+    })());
+
+    /* ===================== A3 - rotation preserves inner product ===================== */
+    regSlide('s-rotate', (function () {
+      const cv = $('dot-cv'); let ang = 0; const q0 = [0.92, 0.34], k0 = [0.36, 0.86];
+      function rot(v, a) { const c = Math.cos(a), s = Math.sin(a); return [v[0] * c - v[1] * s, v[0] * s + v[1] * c]; }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 30, r: 22, t: 30, b: 26 }, -1.15, 1.15, -1.15, 1.15);
+        drawGrid(ctx, V, w, h, { nx: 8, ny: 8 });
+        const ox = V.X(0), oy = V.Y(0);
+        const q = rot(q0, ang), k = rot(k0, ang);
+        // faded originals
+        arrow(ctx, ox, oy, V.X(q0[0]), V.Y(q0[1]), rgba(THEME.c.mute, 0.4), 1.5);
+        arrow(ctx, ox, oy, V.X(k0[0]), V.Y(k0[1]), rgba(THEME.c.mute, 0.4), 1.5);
+        arrow(ctx, ox, oy, V.X(q[0]), V.Y(q[1]), THEME.c.amber, 2.8); label(ctx, V.X(q[0]) + 8, V.Y(q[1]), 'Rq', THEME.c.amber);
+        arrow(ctx, ox, oy, V.X(k[0]), V.Y(k[1]), THEME.c.blue, 2.8); label(ctx, V.X(k[0]) + 8, V.Y(k[1]), 'Rk', THEME.c.blue);
+        T_('dot-ip', dot(q, k).toFixed(2));
+      }
+      $('dot-ang').oninput = e => { ang = (+e.target.value) / 100 * 2 * Math.PI; T_('dot-angv', Math.round((+e.target.value) / 100 * 360) + '°'); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== A4 - results bars ===================== */
+    regSlide('s-tqresults', {
+      enter() { document.querySelectorAll('#tq-bars i').forEach((i, k) => { i.style.width = '0%'; setTimeout(() => { i.style.width = i.dataset.v + '%'; }, 80 + k * 90); }); },
+      leave() { document.querySelectorAll('#tq-bars i').forEach(i => i.style.width = '0%'); }
+    });
+
+    /* ===================== B1 - scaling law ===================== */
+    regSlide('s-scaling', (function () {
+      const cv = $('scale-cv'); const Linf = 0.18, alpha = 0.34, SHIFT = 16; let frac = 0.78;
+      function lossN(D) { return Linf + Math.pow(1 / D, alpha); }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 52, r: 24, t: 40, b: 48 }, 0, 6, 0.1, 1.25);
+        drawGrid(ctx, V, w, h, { nx: 6, ny: 6 }); drawFrame(ctx, V, w, h, { xlabel: 'log2 data', ylabel: 'loss' });
+        const ntp = [], stp = [];
+        for (let i = 0; i <= 60; i++) { const lx = i / 60 * 6, D = Math.pow(2, lx); ntp.push([lx, lossN(D)]); stp.push([lx, lossN(D * SHIFT)]); }
+        polyline(ctx, V, ntp, THEME.c.mute, 2.6); polyline(ctx, V, stp, THEME.c.blue, 2.8);
+        const lx = frac * 6, lN = lossN(Math.pow(2, lx)), lxs = Math.max(0, lx - Math.log2(SHIFT));
+        dashed(ctx, V.X(lx), V.p.t, V.X(lx), V.p.t + V.ih, rgba(THEME.c.blue, 0.4), 1, [4, 4]);
+        dotAt(ctx, V.X(lx), V.Y(lN), 5, THEME.c.mute); dotAt(ctx, V.X(lxs), V.Y(lN), 5, THEME.c.blue);
+        dashed(ctx, V.X(lxs), V.Y(lN), V.X(lx), V.Y(lN), THEME.c.amber, 1.5, [3, 3]);
+        label(ctx, V.p.l + 10, V.p.t + 16, 'NTP', THEME.c.mute); label(ctx, V.p.l + 10, V.p.t + 32, '+STP', THEME.c.blue);
+        label(ctx, V.X((lx + lxs) / 2), V.Y(lN) - 9, '16x less data', THEME.c.amber, { align: 'center', font: '11px "JetBrains Mono",monospace' });
+      }
+      $('scale-d').oninput = e => { frac = (+e.target.value) / 100; T_('scale-dv', (Math.pow(2, frac * 6 - 6) * 100).toFixed(0) + '%'); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== B3 - 3D tube + loss gauge ===================== */
+    regSlide('s-tube', (function () {
+      const cv = $('tube3d-cv'), gcv = $('tube-gauge'); if (!cv || !gcv) return {};
+      const cam = make3D(0.62, -0.32); const hs = [-1.5, 0, 0], ht = [1.5, 0, 0]; const BLUE = '109,176,245';
+      let hr = [0, 0, 0], eps = 0.30, displayL = 0, targetL = 0, autoTrain = false, gaugeRaf = null, tipPx = { x: 0, y: 0 };
+      function geom() { const chord = sub(ht, hs), rel = sub(hr, hs); const par = projPar(rel, chord), foot = add(hs, par), perp = sub(hr, foot); const L = 1 - cosSim(sub(ht, hr), sub(hr, hs)); return { par, foot, perp, noise: norm(perp), signal: norm(par), L: Math.max(0, L) }; }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h); cam.setView(w, h, 0.30, 6);
+        const g = geom(), inTube = g.noise <= eps;
+        tube3D(ctx, cam, hs, ht, eps, BLUE, { rings: 20, seg: 30 });
+        line3(ctx, cam, hs, ht, rgba(THEME.c.blue, 0.85), 2.2);
+        arrow3(ctx, cam, hs, g.foot, THEME.c.green, 3);
+        arrow3(ctx, cam, g.foot, hr, inTube ? THEME.c.green : THEME.c.red, 2.6);
+        polyline3(ctx, cam, [hs, hr, ht], rgba(THEME.c.blue, 0.55), 1.6);
+        if (!inTube && autoTrain) arrow3(ctx, cam, hr, g.foot, 'rgba(245,166,35,0.85)', 1.6, 7);
+        const ps = cam.proj(hs), pt = cam.proj(ht); dotAt(ctx, ps.x, ps.y, 4.5, THEME.c.dim); label(ctx, ps.x - 6, ps.y + 16, 'h_s', THEME.c.dim); dotAt(ctx, pt.x, pt.y, 4.5, THEME.c.dim); label(ctx, pt.x + 8, pt.y, 'h_t', THEME.c.dim);
+        const pr = cam.proj(hr); dotAt(ctx, pr.x, pr.y, 7, inTube ? THEME.c.green : THEME.c.red, inTube ? 'rgba(70,208,127,0.35)' : 'rgba(251,113,133,0.35)'); label(ctx, pr.x + 9, pr.y - 8, 'h_r', inTube ? THEME.c.green : THEME.c.red);
+        T_('tube-sig', g.signal.toFixed(2)); T_('tube-noise', g.noise.toFixed(2));
+        const st = $('tube-status');
+        if (st) { if (inTube) { st.style.borderTopColor = 'var(--green)'; st.innerHTML = '<b style="color:var(--green)">In the tube.</b> Pure signal, loss near zero.'; } else if (g.noise < eps * 1.8) { st.style.borderTopColor = 'var(--amber)'; st.innerHTML = '<b style="color:var(--amber)">Leaving the tube.</b> Noise ε = ' + g.noise.toFixed(2) + ', loss climbing.'; } else { st.style.borderTopColor = 'var(--red)'; st.innerHTML = '<b style="color:var(--red)">Off the geodesic.</b> Noise dominates. The wobble STP removes.'; } }
+        targetL = g.L; tipPx = pr;
+      }
+      function drawGaugeNow() { const { ctx, w, h } = setupCanvas(gcv); clearCanvas(ctx, w, h); drawGauge(ctx, w / 2, h * 0.58, Math.min(w, h) * 0.40, displayL, { max: 2, label: '1 - cos' }); }
+      function gloop() { displayL += (targetL - displayL) * 0.18; drawGaugeNow(); gaugeRaf = requestAnimationFrame(gloop); }
+      function knock() { const a = srand() * 6.283, r = 0.75 + srand() * 0.6; hr = [(srand() * 2 - 1) * 0.35, Math.cos(a) * r, Math.sin(a) * r]; }
+      function trainLoop() { if (!autoTrain) return; const g = geom(); if (g.noise > eps * 0.5) { hr = add(hr, scale(sub(g.foot, hr), 0.13)); render(); requestAnimationFrame(trainLoop); } else { render(); setTimeout(() => { if (autoTrain) { knock(); render(); requestAnimationFrame(trainLoop); } }, 520); } }
+      attachOrbit(cv, cam, render, { getTipPx: () => tipPx, onDrag: (px, py) => { hr = cam.dragTo(px, py, hr).map(v => clamp(v, -1.7, 1.7)); render(); } });
+      $('tube-train').onclick = () => { autoTrain = !autoTrain; const b = $('tube-train'); b.textContent = autoTrain ? 'stop' : 'auto-train'; b.classList.toggle('on', autoTrain); if (autoTrain) { if (geom().noise < eps) knock(); trainLoop(); } };
+      $('tube-eps').oninput = e => { eps = +e.target.value; render(); };
+      return { enter() { render(); if (!gaugeRaf) gloop(); }, leave() { autoTrain = false; const b = $('tube-train'); if (b) { b.textContent = 'auto-train'; b.classList.remove('on'); } if (gaugeRaf) { cancelAnimationFrame(gaugeRaf); gaugeRaf = null; } }, resize() { render(); } };
+    })());
+
+    /* ===================== B4 - inference cone, two meanings ===================== */
+    regSlide('s-collapse', (function () {
+      const cv = $('cone-cv'); if (!cv) return {};
+      const cam = make3D(0.5, -0.30); let sig = 0.7, stpOn = true, curSig = null;
+      const X0 = -1.5, X1 = 1.5, SEP = 0.5, ENS = 16, STEPS = 40, RT3 = Math.sqrt(3), C1 = '127,214,255', C2 = '201,167,255';
+      function targetSig() { return stpOn ? sig * 0.32 : sig; }
+      function ensembleFor(cyc, seed, se) { _seed = seed; const ps = []; for (let m = 0; m < ENS; m++) { const p = [[X0, cyc, 0]]; let y = cyc, z = 0; for (let i = 1; i <= STEPS; i++) { y += (srand() * 2 - 1) * se * RT3 / Math.sqrt(STEPS); z += (srand() * 2 - 1) * se * RT3 / Math.sqrt(STEPS); p.push([lerp(X0, X1, i / STEPS), y, z]); } ps.push(p); } return ps; }
+      function coneRings(ctx, cyc, se, rgb) { const rings = []; for (let i = 0; i <= 20; i++) { const frac = i / 20, cx = lerp(X0, X1, frac), rad = se * Math.sqrt(frac) * 1.6, pts = []; for (let j = 0; j <= 24; j++) { const a = j / 24 * 6.283; pts.push(cam.proj([cx, cyc + Math.cos(a) * rad, Math.sin(a) * rad])); } let md = 0; pts.forEach(p => md += p.depth); rings.push({ pts, depth: md / pts.length }); } rings.sort((a, b) => a.depth - b.depth); rings.forEach(r => { const t = clamp((r.depth + 1.6) / 3.2, 0, 1); ctx.save(); ctx.strokeStyle = 'rgba(' + rgb + ',' + (0.06 + 0.16 * t).toFixed(3) + ')'; ctx.lineWidth = 1; ctx.beginPath(); r.pts.forEach((p, k) => k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke(); ctx.restore(); }); }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h); cam.setView(w, h, 0.30, 8);
+        if (curSig == null) curSig = targetSig(); const se = curSig;
+        line3(ctx, cam, [X0, 0, 0], [X1, 0, 0], THEME.c.mute, 1, [3, 4]);
+        coneRings(ctx, SEP, se, C1); coneRings(ctx, -SEP, se, C2);
+        const e1 = ensembleFor(SEP, 4242, se), e2 = ensembleFor(-SEP, 9001, se);
+        e1.forEach(p => polyline3(ctx, cam, p, 'rgba(' + C1 + ',0.34)', 1)); e2.forEach(p => polyline3(ctx, cam, p, 'rgba(' + C2 + ',0.34)', 1));
+        line3(ctx, cam, [X0, SEP, 0], [X1, SEP, 0], '#7fd6ff', 2.4); line3(ctx, cam, [X0, -SEP, 0], [X1, -SEP, 0], '#c9a7ff', 2.4);
+        const m1 = cam.proj([X1, SEP, 0]); label(ctx, m1.x - 12, m1.y - 8, 'meaning A', '#7fd6ff'); const m2 = cam.proj([X1, -SEP, 0]); label(ctx, m2.x - 12, m2.y + 16, 'meaning B', '#c9a7ff');
+        let cross = 0; e1.forEach(p => { if (p[STEPS][1] < 0) cross++; }); e2.forEach(p => { if (p[STEPS][1] > 0) cross++; }); const mf = cross / (2 * ENS);
+        T_('cone-p', Math.round(mf * 100) + '%'); T_('cone-sep', mf < 0.06 ? '2 / 2' : mf < 0.2 ? 'fraying' : 'merged');
+        const pe = $('cone-p'); if (pe) pe.style.color = mf > 0.2 ? 'var(--red)' : mf > 0.06 ? 'var(--amber)' : 'var(--green)';
+        const sp = $('cone-sep'); if (sp) sp.style.color = mf < 0.06 ? 'var(--green)' : mf < 0.2 ? 'var(--amber)' : 'var(--red)';
+      }
+      function animateTo() { const tgt = targetSig(); (function step() { curSig += (tgt - curSig) * 0.18; render(); if (Math.abs(curSig - tgt) > 0.004) requestAnimationFrame(step); else { curSig = tgt; render(); } })(); }
+      $('cone-sig').oninput = e => { sig = +e.target.value; curSig = targetSig(); render(); };
+      $('cone-stp').onclick = () => { stpOn = !stpOn; const b = $('cone-stp'); b.textContent = stpOn ? 'STP: on, distinct' : 'STP: off, merging'; b.classList.toggle('on', stpOn); animateTo(); };
+      attachOrbit(cv, cam, render, {});
+      return { enter() { if (curSig == null) curSig = targetSig(); render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== B5 - one knob, the whole chain ===================== */
+    regSlide('s-oneknob', (function () {
+      const cv = $('fuse-path'); if (!cv) return {};
+      const N = 9, AX = -1.25, BX = 1.25, EPS = 0.34; const offs = []; _seed = 20240;
+      for (let i = 0; i < N; i++) { const bell = Math.sin(i / (N - 1) * Math.PI); offs.push((srand() * 2 - 1) * 0.9 * bell); }
+      let s = 0, playing = false; const N0 = 1.7, N1 = 0.10; const infoOf = snr => 0.5 * Math.log2(1 + snr); const noiseOf = x => Math.exp(lerp(Math.log(N0), Math.log(N1), x)); const I1 = infoOf(1 / (N1 * N1));
+      function pathPts() { const P = []; for (let i = 0; i < N; i++) P.push([lerp(AX, BX, i / (N - 1)), offs[i] * (1 - s)]); return P; }
+      function drawPath() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 18, r: 16, t: 16, b: 16 }, -1.45, 1.45, -0.95, 0.95);
+        ctx.save(); ctx.fillStyle = rgba(THEME.c.blue, 0.06); ctx.fillRect(V.X(AX), V.Y(EPS), V.X(BX) - V.X(AX), V.Y(-EPS) - V.Y(EPS)); ctx.restore();
+        dashed(ctx, V.X(AX), V.Y(EPS), V.X(BX), V.Y(EPS), rgba(THEME.c.blue, 0.3), 1, [5, 4]); dashed(ctx, V.X(AX), V.Y(-EPS), V.X(BX), V.Y(-EPS), rgba(THEME.c.blue, 0.3), 1, [5, 4]); dashed(ctx, V.X(AX), V.Y(0), V.X(BX), V.Y(0), THEME.c.mute, 1.4, [6, 5]);
+        const P = pathPts(), straight = s > 0.8;
+        P.forEach((p, i) => { if (i > 0 && i < N - 1 && Math.abs(p[1]) > 0.02) dashed(ctx, V.X(p[0]), V.Y(0), V.X(p[0]), V.Y(p[1]), THEME.c.red, 1, [2, 2]); });
+        polyline(ctx, V, P, straight ? THEME.c.green : THEME.c.blue, 2.8);
+        P.forEach(p => dotAt(ctx, V.X(p[0]), V.Y(p[1]), 3.5, THEME.c.mute));
+        label(ctx, V.p.l + V.iw - 6, V.p.t + V.ih - 6, straight ? 'geodesic' : 'wobbly · noise across path', straight ? THEME.c.green : THEME.c.red, { align: 'right' });
+      }
+      function setTile(id, val, col) { const v = $(id); if (v) { v.textContent = val; v.style.color = col; } }
+      function update() {
+        drawPath(); const nz = noiseOf(s), snr = 1 / (nz * nz), info = infoOf(snr), dataRel = I1 / info, acc = 20 + 65 * (s * s * (3 - 2 * s));
+        const P = pathPts(); let L = 0, c = 0; for (let i = 0; i < N - 2; i++) for (let j = i + 1; j < N - 1; j++) for (let l = j + 1; l < N; l++) { L += 1 - cosSim(sub(P[l], P[j]), sub(P[j], P[i])); c++; } L /= c;
+        setTile('fuse-loss', L.toFixed(2), L < 0.25 ? 'var(--green)' : L < 0.6 ? 'var(--amber)' : 'var(--red)');
+        setTile('fuse-snr', snr < 10 ? snr.toFixed(1) : String(Math.round(snr)), snr > 20 ? 'var(--green)' : snr > 3 ? 'var(--amber)' : 'var(--red)');
+        setTile('fuse-data', dataRel.toFixed(1) + 'x', dataRel < 1.6 ? 'var(--green)' : dataRel < 4 ? 'var(--amber)' : 'var(--red)');
+        setTile('fuse-acc', Math.round(acc) + '%', acc > 70 ? 'var(--green)' : acc > 45 ? 'var(--amber)' : 'var(--red)');
+        const pn = $('fuse-punch'); if (pn) { if (s < 0.15) pn.innerHTML = 'Raw training: low SNR, you would need ~16x the data.'; else if (s > 0.9) pn.innerHTML = 'Trained straight: the same accuracy at 1/16 the data.'; else pn.innerHTML = 'Training. Loss falls, SNR climbs, data needed collapses.'; }
+      }
+      function setS(v) { s = clamp(v, 0, 1); const sl = $('fuse-slider'); if (sl) sl.value = Math.round(s * 100); T_('fuse-sliderv', Math.round(s * 100) + '%'); update(); }
+      $('fuse-play').onclick = () => { if (playing) return; playing = true; const dir = s > 0.5 ? -1 : 1; let v = s; (function step() { v += dir * 0.017; if (v >= 1) v = 1; if (v <= 0) v = 0; setS(v); if (v > 0 && v < 1) requestAnimationFrame(step); else playing = false; })(); };
+      $('fuse-slider').oninput = e => { s = (+e.target.value) / 100; T_('fuse-sliderv', e.target.value + '%'); update(); };
+      return { enter() { update(); }, resize() { update(); } };
+    })());
+
+    /* ===================== C1 - entity assembly reveal ===================== */
+    regSlide('s-lookup', (function () {
+      let timers = [];
+      const clear = () => { timers.forEach(clearTimeout); timers = []; };
+      return {
+        enter() { clear(); const rows = document.querySelectorAll('#etable .erow'); rows.forEach((r, i) => { r.classList.remove('show'); timers.push(setTimeout(() => r.classList.add('show'), 250 + i * 420)); }); },
+        leave() { clear(); document.querySelectorAll('#etable .erow').forEach(r => r.classList.remove('show')); }
+      };
+    })());
+
+    /* ===================== C3 - sparsity U-curve ===================== */
+    regSlide('s-ucurve', (function () {
+      const cv = $('ucurve-cv'); let rho = 0.30; const RHO0 = 0.78;
+      function loss(r) { return 2.05 + 2.4 * (r - RHO0) * (r - RHO0) + (r < RHO0 ? 0.6 * (RHO0 - r) : 0); }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 50, r: 24, t: 40, b: 48 }, 0, 1, 1.9, 3.4);
+        drawGrid(ctx, V, w, h, { nx: 5, ny: 6 }); drawFrame(ctx, V, w, h, { xlabel: 'moe share', ylabel: 'val loss' });
+        const pts = []; for (let i = 0; i <= 60; i++) { const r = i / 60; pts.push([r, loss(r)]); }
+        // sweet-spot band
+        ctx.save(); ctx.fillStyle = rgba(THEME.c.purple, 0.08); ctx.fillRect(V.X(0.68), V.p.t, V.X(0.86) - V.X(0.68), V.ih); ctx.restore();
+        dashed(ctx, V.X(RHO0), V.p.t, V.X(RHO0), V.p.t + V.ih, rgba(THEME.c.purple, 0.5), 1, [4, 4]);
+        label(ctx, V.X(RHO0), V.p.t + 14, 'sweet spot', THEME.c.purple, { align: 'center', font: '11px "JetBrains Mono",monospace' });
+        polyline(ctx, V, pts, THEME.c.purple, 2.8);
+        const lN = loss(rho);
+        dashed(ctx, V.X(rho), V.Y(lN), V.X(rho), V.p.t + V.ih, rgba(THEME.c.dim, 0.3), 1, [3, 3]);
+        dotAt(ctx, V.X(rho), V.Y(lN), 6, THEME.c.text, rgba(THEME.c.purple, 0.4));
+        label(ctx, V.p.l + 8, V.p.t + V.ih - 8, 'pure engram', THEME.c.mute, { font: '10px "JetBrains Mono",monospace' });
+        label(ctx, V.p.l + V.iw - 8, V.p.t + V.ih - 8, 'pure moe', THEME.c.mute, { align: 'right', font: '10px "JetBrains Mono",monospace' });
+        T_('uc-loss', lN.toFixed(2));
+        const reg = rho < 0.6 ? 'Too little MoE' : rho > 0.88 ? 'Too much MoE' : 'Sweet spot';
+        T_('uc-reg', reg); const re = $('uc-reg'); if (re) re.style.color = reg === 'Sweet spot' ? 'var(--green)' : 'var(--amber)';
+      }
+      $('uc-rho').oninput = e => { rho = (+e.target.value) / 100; T_('uc-rhov', e.target.value + '%'); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== C4 - CKA depth heatmap ===================== */
+    regSlide('s-deeper', (function () {
+      const cv = $('cka-cv'); const NL = 8, SHIFT = 3;
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 50, r: 28, t: 34, b: 44 }, 0, NL, 0, NL);
+        const cw = V.iw / NL, ch = V.ih / NL;
+        for (let i = 0; i < NL; i++) for (let j = 0; j < NL; j++) {
+          const m = Math.exp(-Math.pow(i - (j + SHIFT), 2) / 1.6);
+          ctx.fillStyle = 'rgba(167,139,250,' + (0.05 + 0.9 * m).toFixed(3) + ')';
+          ctx.fillRect(V.p.l + i * cw + 1, V.p.t + (NL - 1 - j) * ch + 1, cw - 2, ch - 2);
+        }
+        // true diagonal (grey) and actual shifted alignment (purple)
+        dashed(ctx, V.X(0), V.Y(0), V.X(NL), V.Y(NL), rgba(THEME.c.mute, 0.8), 1.5, [5, 4]);
+        label(ctx, V.X(NL) - 4, V.Y(NL) - 6, 'equal depth', THEME.c.mute, { align: 'right', font: '10px "JetBrains Mono",monospace' });
+        polyline(ctx, V, [[SHIFT, 0], [NL, NL - SHIFT]], THEME.c.purple, 2.4);
+        const mid = cam_label(V, SHIFT + 1.5, 1.5); label(ctx, mid.x, mid.y, 'engram reaches it earlier', THEME.c.purple, { font: '11px "JetBrains Mono",monospace' });
+        drawFrame(ctx, V, w, h, { xlabel: 'moe layer', ylabel: 'engram layer' });
+      }
+      function cam_label(V, x, y) { return { x: V.X(x), y: V.Y(y) }; }
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== CLOSE ambient (bookend) ===================== */
+    regSlide('s-close', (function () {
+      const cv = document.getElementById('close-cv'); let raf = null, t = 0;
+      const cols = ['245,166,35', '109,176,245', '167,139,250'];
+      const lines = []; _seed = 23;
+      for (let i = 0; i < 5; i++) lines.push({ y: 0.2 + 0.6 * srand(), amp: 0.03 + 0.055 * srand(), freq: 0.6 + 1.2 * srand(), ph: srand() * 6.28, sp: 0.0013 + 0.0015 * srand(), col: cols[i % 3] });
+      function draw() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        lines.forEach(L => {
+          ctx.save(); ctx.strokeStyle = 'rgba(' + L.col + ',0.14)'; ctx.lineWidth = 1.5; ctx.beginPath();
+          for (let px = 0; px <= w; px += 8) { const u = px / w; const y = (L.y + L.amp * Math.sin(u * 6.28 * L.freq + L.ph + t * L.sp * 18)) * h; px ? ctx.lineTo(px, y) : ctx.moveTo(px, y); }
+          ctx.stroke();
+          const u = (t * L.sp * 0.28) % 1, px = u * w, y = (L.y + L.amp * Math.sin(u * 6.28 * L.freq + L.ph + t * L.sp * 18)) * h;
+          ctx.fillStyle = 'rgba(' + L.col + ',0.42)'; ctx.beginPath(); ctx.arc(px, y, 2.4, 0, 7); ctx.fill(); ctx.restore();
+        });
+      }
+      function loop() { t++; draw(); raf = requestAnimationFrame(loop); }
+      return { enter() { if (!raf) loop(); }, leave() { if (raf) cancelAnimationFrame(raf); raf = null; }, resize() { draw(); } };
+    })());
+
+    /* ===================== A0 - what quantize means ===================== */
+    regSlide('s-quant', (function () {
+      const cv = $('quant-cv'); let v = 0.26, bits = 4, LV = 16, step = 2 / (LV - 1);
+      function level(x) { const k = Math.round((x + 1) / step); return -1 + clamp(k, 0, LV - 1) * step; }
+      function setBits(b) {
+        bits = b; LV = Math.pow(2, b); step = 2 / (LV - 1);
+        const cap = $('quant-cap'); if (cap) cap.innerHTML = '<b>' + b + ' bits</b> = ' + LV + ' levels';
+        const wrap = $('quant-bits'); if (wrap) wrap.querySelectorAll('.btn').forEach(btn => { const on = +btn.dataset.bits === b; btn.classList.toggle('on', on); btn.classList.toggle('ghost', !on); });
+        render();
+      }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 30, r: 30, t: 60, b: 50 }, -1.1, 1.1, -1, 1);
+        const y = V.p.t + V.ih * 0.5;
+        ctx.strokeStyle = THEME.c.axis; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(V.X(-1), y); ctx.lineTo(V.X(1), y); ctx.stroke();
+        for (let k = 0; k < LV; k++) { const lx = -1 + k * step; ctx.strokeStyle = rgba(THEME.c.mute, 0.55); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(V.X(lx), y - 7); ctx.lineTo(V.X(lx), y + 7); ctx.stroke(); }
+        const sn = level(v);
+        arrow(ctx, V.X(v), y - 46, V.X(v), y - 11, THEME.c.amber, 2);
+        label(ctx, V.X(v), y - 54, 'value ' + v.toFixed(2), THEME.c.amber, { align: 'center' });
+        ctx.strokeStyle = THEME.c.green; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(V.X(sn), y - 11); ctx.lineTo(V.X(sn), y + 11); ctx.stroke();
+        dotAt(ctx, V.X(sn), y, 5, THEME.c.green);
+        label(ctx, V.X(sn), y + 32, 'stored ' + sn.toFixed(2), THEME.c.green, { align: 'center' });
+        if (Math.abs(v - sn) > 0.001) { ctx.strokeStyle = THEME.c.red; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(V.X(v), y); ctx.lineTo(V.X(sn), y); ctx.stroke(); }
+        T_('quant-stored', sn.toFixed(2)); T_('quant-err', Math.abs(v - sn).toFixed(3));
+      }
+      $('quant-v').oninput = e => { v = (+e.target.value) / 100 * 2 - 1; T_('quant-vv', v.toFixed(2)); render(); };
+      const bw = $('quant-bits'); if (bw) bw.querySelectorAll('.btn').forEach(btn => btn.onclick = () => setBits(+btn.dataset.bits));
+      return { enter() { setBits(bits); }, resize() { render(); } };
+    })());
+
+    /* ===================== B0 - a sentence is a path ===================== */
+    regSlide('s-path', (function () {
+      const cv = $('path-cv'); const toks = ['the', 'cat', 'sat', 'on', 'the', 'mat', '.']; const N = toks.length;
+      const pts = []; for (let i = 0; i < N; i++) pts.push([-1.15 + 2.3 * i / (N - 1), 0.4 * Math.sin(i * 0.8 + 0.3) - 0.05]);
+      let shown = N, raf = null;
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 24, r: 24, t: 30, b: 26 }, -1.4, 1.4, -1.05, 1.05);
+        drawGrid(ctx, V, w, h, { nx: 8, ny: 6 });
+        const k = Math.max(1, Math.min(N, Math.round(shown)));
+        polyline(ctx, V, pts.slice(0, k), THEME.c.blue, 2.6);
+        for (let i = 0; i < k; i++) { const last = i === k - 1; dotAt(ctx, V.X(pts[i][0]), V.Y(pts[i][1]), last ? 6 : 4, last ? THEME.c.blue : THEME.c.dim); label(ctx, V.X(pts[i][0]), V.Y(pts[i][1]) - 13, toks[i], last ? THEME.c.blue : THEME.c.mute, { align: 'center' }); }
+      }
+      function play() { if (raf) cancelAnimationFrame(raf); shown = 1; (function step() { shown += 0.05; render(); if (shown < N) raf = requestAnimationFrame(step); else { shown = N; render(); raf = null; } })(); }
+      $('path-go').onclick = play;
+      return { enter() { play(); }, leave() { if (raf) { cancelAnimationFrame(raf); raf = null; } }, resize() { render(); } };
+    })());
+
+    /* ===================== B0b - two steps, one angle ===================== */
+    regSlide('s-step', (function () {
+      const cv = $('step-cv'); const s = [-1.0, -0.35], t = [1.0, 0.35]; let bend = 0.45;
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 24, r: 24, t: 26, b: 26 }, -1.3, 1.3, -1.1, 1.1);
+        drawGrid(ctx, V, w, h, { nx: 8, ny: 6 });
+        const chord = sub(t, s), mid = [(s[0] + t[0]) / 2, (s[1] + t[1]) / 2], pd = normalize([-chord[1], chord[0]]);
+        const r = [mid[0] + pd[0] * bend, mid[1] + pd[1] * bend];
+        dashed(ctx, V.X(s[0]), V.Y(s[1]), V.X(t[0]), V.Y(t[1]), THEME.c.mute, 1.5, [5, 5]);
+        arrow(ctx, V.X(s[0]), V.Y(s[1]), V.X(r[0]), V.Y(r[1]), THEME.c.green, 3);
+        arrow(ctx, V.X(r[0]), V.Y(r[1]), V.X(t[0]), V.Y(t[1]), THEME.c.blue, 3);
+        [[s, 's', THEME.c.dim], [r, 'r', THEME.c.blue], [t, 't', THEME.c.dim]].forEach(([p, lb, c]) => { dotAt(ctx, V.X(p[0]), V.Y(p[1]), 5, c); label(ctx, V.X(p[0]) + 8, V.Y(p[1]) - 8, lb, c); });
+        const c = cosSim(sub(r, s), sub(t, r)), ang = Math.acos(clamp(c, -1, 1)) * 180 / Math.PI, loss = 1 - c;
+        T_('step-ang', Math.round(ang) + '°'); T_('step-loss', loss.toFixed(2));
+        const le = $('step-loss'); if (le) le.style.color = loss < 0.1 ? 'var(--green)' : loss > 0.5 ? 'var(--red)' : 'var(--amber)';
+        const ae = $('step-ang'); if (ae) ae.style.color = ang < 15 ? 'var(--green)' : ang > 50 ? 'var(--red)' : 'var(--amber)';
+      }
+      $('step-bend').oninput = e => { bend = (+e.target.value) / 100 * 0.85; T_('step-bendv', e.target.value + '%'); render(); };
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== B0c - signal along, noise across ===================== */
+    regSlide('s-decomp', (function () {
+      const cv = $('decomp-cv'); let tilt = 0.34; const L = 1.12, B = [1.18, 0];
+      const deg = () => Math.round(tilt * 1.15 * 180 / Math.PI);
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 24, r: 24, t: 26, b: 30 }, -0.18, 1.46, -0.22, 1.32);
+        drawGrid(ctx, V, w, h, { nx: 8, ny: 6 });
+        const ox = V.X(0), oy = V.Y(0), th = tilt * 1.15;
+        const a = [L * Math.cos(th), L * Math.sin(th)];
+        const par = projPar(a, B), perp = sub(a, par);
+        const sx = V.X(par[0]), sy = V.Y(par[1]);
+        // direction of travel (reference)
+        arrow(ctx, ox, oy, V.X(B[0]), V.Y(B[1]), THEME.c.mute, 2);
+        label(ctx, V.X(B[0]), V.Y(B[1]) + 17, 'direction of travel', THEME.c.mute, { align: 'right', font: '10px "JetBrains Mono", monospace' });
+        // the step itself (dashed accent)
+        dashed(ctx, ox, oy, V.X(a[0]), V.Y(a[1]), THEME.c.blue, 1.8, [5, 5]);
+        // signal (along) + noise (across)
+        arrow(ctx, ox, oy, sx, sy, THEME.c.green, 3.5);
+        arrow(ctx, sx, sy, V.X(a[0]), V.Y(a[1]), THEME.c.red, 3);
+        // right-angle marker at the foot of the noise component
+        if (norm(perp) > 0.05) { const m = 9; ctx.save(); ctx.strokeStyle = THEME.c.red; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(sx - m, sy); ctx.lineTo(sx - m, sy - m); ctx.lineTo(sx, sy - m); ctx.stroke(); ctx.restore(); }
+        dotAt(ctx, V.X(a[0]), V.Y(a[1]), 5, THEME.c.blue);
+        label(ctx, V.X(a[0]) + 9, V.Y(a[1]) - 7, 'the step', THEME.c.blue);
+        label(ctx, V.X(par[0] / 2), oy + 17, 'signal', THEME.c.green, { align: 'center' });
+        if (norm(perp) > 0.12) label(ctx, sx + 9, (sy + V.Y(a[1])) / 2 + 4, 'noise', THEME.c.red);
+        T_('decomp-sig', norm(par).toFixed(2)); T_('decomp-noise', norm(perp).toFixed(2));
+      }
+      $('decomp-a').oninput = e => { tilt = (+e.target.value) / 100; T_('decomp-av', deg() + '°'); render(); };
+      return { enter() { T_('decomp-av', deg() + '°'); render(); }, resize() { render(); } };
+    })());
+
+    /* ===================== A2 - universal codebook (Lloyd-Max on the post-rotation bell) ===================== */
+    regSlide('s-codebook', (function () {
+      const cv = $('cb-cv'); if (!cv) return {};
+      const CB = { 1: [-0.7979, 0.7979], 2: [-1.5104, -0.4528, 0.4528, 1.5104], 3: [-2.1519, -1.3439, -0.7560, -0.2451, 0.2451, 0.7560, 1.3439, 2.1519] };
+      let bits = 2;
+      const pdf = x => Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI);
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 24, r: 18, t: 22, b: 30 }, -3, 3, 0, 0.46);
+        drawGrid(ctx, V, w, h, { nx: 6, ny: 4 });
+        const pts = []; for (let i = 0; i <= 120; i++) { const x = -3 + 6 * i / 120; pts.push([x, pdf(x)]); }
+        ctx.save(); ctx.beginPath(); ctx.moveTo(V.X(-3), V.Y(0)); pts.forEach(p => ctx.lineTo(V.X(p[0]), V.Y(p[1]))); ctx.lineTo(V.X(3), V.Y(0)); ctx.closePath(); ctx.fillStyle = rgba(THEME.c.amber, 0.10); ctx.fill(); ctx.restore();
+        polyline(ctx, V, pts, rgba(THEME.c.amber, 0.55), 2);
+        const cs = CB[bits];
+        for (let k = 0; k < cs.length - 1; k++) { const m = (cs[k] + cs[k + 1]) / 2; dashed(ctx, V.X(m), V.Y(0), V.X(m), V.p.t, rgba(THEME.c.red, 0.38), 1, [4, 3]); }
+        cs.forEach(c => { ctx.strokeStyle = THEME.c.blue; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(V.X(c), V.Y(0)); ctx.lineTo(V.X(c), V.Y(pdf(c))); ctx.stroke(); dotAt(ctx, V.X(c), V.Y(pdf(c)), 4, THEME.c.blue); });
+        label(ctx, V.X(0), V.p.t + V.ih + 22, 'rotated coordinate value', THEME.c.mute, { align: 'center', font: '10px "JetBrains Mono", monospace' });
+        label(ctx, V.p.l + 4, V.p.t + 12, '', THEME.c.dim, { font: '10px "JetBrains Mono", monospace' });
+      }
+      function setBits(b) {
+        bits = b; const cap = $('cb-cap'); if (cap) cap.innerHTML = '<b>' + b + '-bit codebook</b> · levels on the bell';
+        const wrap = $('cb-bits'); if (wrap) wrap.querySelectorAll('.btn').forEach(btn => { const on = +btn.dataset.bits === b; btn.classList.toggle('on', on); btn.classList.toggle('ghost', !on); });
+        T_('cb-L', Math.pow(2, b)); T_('cb-sh', b === 1 ? '≈1.45x' : '≈2.7x'); render();
+      }
+      const wrap = $('cb-bits'); if (wrap) wrap.querySelectorAll('.btn').forEach(btn => btn.onclick = () => setBits(+btn.dataset.bits));
+      return { enter() { setBits(bits); }, resize() { render(); } };
+    })());
+
+    /* ===================== A2b - the inner-product bias (shrinkage staircase) ===================== */
+    regSlide('s-bias', (function () {
+      const cv = $('bias-cv'); if (!cv) return {};
+      const CB = { 1: [-0.7979, 0.7979], 2: [-1.5104, -0.4528, 0.4528, 1.5104], 3: [-2.1519, -1.3439, -0.7560, -0.2451, 0.2451, 0.7560, 1.3439, 2.1519] };
+      const LAM = { 1: 0.6366, 2: 0.8825, 3: 0.9655 };
+      let bits = 1;
+      function nearest(x, cs) { let best = cs[0], bd = Math.abs(x - cs[0]); for (const c of cs) { const d = Math.abs(x - c); if (d < bd) { bd = d; best = c; } } return best; }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 30, r: 18, t: 22, b: 30 }, -3, 3, -3, 3);
+        drawGrid(ctx, V, w, h, { nx: 6, ny: 6 });
+        dashed(ctx, V.X(-3), V.Y(-3), V.X(3), V.Y(3), rgba(THEME.c.mute, 0.6), 1.5, [5, 4]);
+        label(ctx, V.X(1.4), V.Y(2.6), 'ỹ = y', THEME.c.mute, { font: '10px "JetBrains Mono", monospace' });
+        const cs = CB[bits];
+        ctx.save(); ctx.strokeStyle = THEME.c.green; ctx.lineWidth = 3; ctx.beginPath(); let started = false;
+        for (let i = 0; i <= 300; i++) { const x = -3 + 6 * i / 300; const yt = nearest(x, cs); const px = V.X(x), py = V.Y(yt); started ? ctx.lineTo(px, py) : (ctx.moveTo(px, py), started = true); }
+        ctx.stroke(); ctx.restore();
+        cs.forEach(c => dotAt(ctx, V.X(c), V.Y(c), 4, THEME.c.green));
+        label(ctx, V.X(0), V.p.t + V.ih + 22, 'input  y', THEME.c.mute, { align: 'center', font: '10px "JetBrains Mono", monospace' });
+        label(ctx, 13, V.p.t + 11, 'stored ỹ', THEME.c.mute, { font: '10px "JetBrains Mono", monospace' });
+        label(ctx, V.p.l + 6, V.Y(-2.4), '', THEME.c.dim, { font: '10px "JetBrains Mono", monospace' });
+        T_('bias-lam', LAM[bits].toFixed(2));
+      }
+      function setBits(b) { bits = b; const wrap = $('bias-bits'); if (wrap) wrap.querySelectorAll('.btn').forEach(btn => { const on = +btn.dataset.bits === b; btn.classList.toggle('on', on); btn.classList.toggle('ghost', !on); }); render(); }
+      const wrap = $('bias-bits'); if (wrap) wrap.querySelectorAll('.btn').forEach(btn => btn.onclick = () => setBits(+btn.dataset.bits));
+      return { enter() { setBits(bits); }, resize() { render(); } };
+    })());
+
+    /* ===================== A2c - QJL: biased vs unbiased inner-product estimate ===================== */
+    regSlide('s-qjl', (function () {
+      const cv = $('qjl-cv'); if (!cv) return {};
+      const MSE_STD = 0.05, QJL_STD = 0.30;          // round-only: tight; +residual bit: wide
+      let recent = [], mseSum = 0, qjlSum = 0, n = 0, raf = null;
+      function reset() { recent = []; mseSum = 0; qjlSum = 0; n = 0; T_('qjl-mse', '–'); T_('qjl-qjl', '–'); render(); }
+      function trial() {
+        const m = 0.637 + gauss() * MSE_STD, q = 1.0 + gauss() * QJL_STD;
+        mseSum += m; qjlSum += q; n++;
+        recent.push({ m, q }); if (recent.length > 40) recent.shift();
+      }
+      function track(ctx, V, yc, half, mean, std, col, name) {
+        const x0 = V.X(clamp(mean - std, 0, 1.5)), x1 = V.X(clamp(mean + std, 0, 1.5));
+        ctx.fillStyle = rgba(col, 0.14); ctx.fillRect(x0, yc - half, x1 - x0, half * 2);   // spread band
+        recent.forEach((r, i) => { const v = name[0] === 'r' ? r.m : r.q; dotAt(ctx, V.X(clamp(v, 0, 1.5)), yc + ((i % 7) - 3) / 3 * half * 0.7, 1.4, rgba(col, 0.28)); });
+        ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(V.X(mean), yc - half - 7); ctx.lineTo(V.X(mean), yc + half + 7); ctx.stroke();
+        dotAt(ctx, V.X(mean), yc, 4.5, col);
+        ctx.fillStyle = col; ctx.font = '600 15px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+        ctx.fillText(mean.toFixed(2), V.X(mean), yc - half - 13); ctx.textAlign = 'left';
+        label(ctx, V.p.l + 2, yc - half - 13, name, THEME.c.mute, { font: '10px "JetBrains Mono", monospace' });
+      }
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 20, r: 20, t: 30, b: 30 }, 0, 1.5, 0, 1);
+        drawGrid(ctx, V, w, h, { nx: 6, ny: 1 });
+        dashed(ctx, V.X(1), V.p.t - 4, V.X(1), V.p.t + V.ih, THEME.c.amber, 1.6, [5, 4]);
+        label(ctx, V.X(1), V.p.t - 10, 'truth 1.00', THEME.c.amber, { align: 'center', font: '10px "JetBrains Mono", monospace' });
+        const yM = V.p.t + V.ih * 0.36, yQ = V.p.t + V.ih * 0.76, half = V.ih * 0.16;
+        if (n > 0) {
+          track(ctx, V, yM, half, mseSum / n, MSE_STD, THEME.c.red, 'round only · biased');
+          track(ctx, V, yQ, half, qjlSum / n, QJL_STD, THEME.c.green, '+ residual bit · unbiased');
+          T_('qjl-mse', (mseSum / n).toFixed(2)); T_('qjl-qjl', (qjlSum / n).toFixed(2));
+        } else {
+          label(ctx, V.X(0.75), V.p.t + V.ih * 0.5, '', THEME.c.mute, { align: 'center' });
+        }
+        label(ctx, V.p.l, V.p.t + V.ih + 22, '', THEME.c.mute, { font: '10px "JetBrains Mono", monospace' });
+      }
+      function run() { if (raf) return; let k = 0; (function step() { for (let j = 0; j < 25; j++) trial(); render(); k++; if (k < 60) raf = requestAnimationFrame(step); else raf = null; })(); }
+      $('qjl-run').onclick = run; $('qjl-reset').onclick = () => { if (raf) { cancelAnimationFrame(raf); raf = null; } reset(); };
+      return { enter() { reset(); }, leave() { if (raf) { cancelAnimationFrame(raf); raf = null; } }, resize() { render(); } };
+    })());
+
+    /* ===================== A2d - Shannon's floor (log-scale rate comparison) ===================== */
+    regSlide('s-shannon', (function () {
+      const cv = $('shan-cv'); if (!cv) return {};
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 30, r: 18, t: 22, b: 30 }, 1, 6, -4, 0.3);
+        drawGrid(ctx, V, w, h, { nx: 5, ny: 5 });
+        const L = v => Math.log10(v);
+        const floor = b => Math.pow(4, -b), tq = b => (b === 1 ? 1.45 : 2.72) * Math.pow(4, -b), old = b => 0.5 / b;
+        const curve = (fn, col, lw, d) => { const pts = []; for (let b = 1; b <= 6; b++) pts.push([b, L(fn(b))]); polyline(ctx, V, pts, col, lw, d); pts.forEach(p => dotAt(ctx, V.X(p[0]), V.Y(p[1]), 3, col)); };
+        curve(old, THEME.c.red, 2);
+        curve(tq, THEME.c.amber, 2.6);
+        curve(floor, THEME.c.green, 2, [5, 4]);
+        label(ctx, V.X(3.0), V.Y(L(old(3))) - 9, 'old sketch ~ 1/b', THEME.c.red, { font: '10px "JetBrains Mono", monospace' });
+        label(ctx, V.X(3.6), V.Y(L(tq(3.6))) - 9, 'turboquant', THEME.c.amber, { font: '10px "JetBrains Mono", monospace' });
+        label(ctx, V.X(3.4), V.Y(L(floor(3.4))) + 14, 'shannon floor 4⁻ᵇ', THEME.c.green, { font: '10px "JetBrains Mono", monospace' });
+        label(ctx, V.X(3.5), V.p.t + V.ih + 22, 'bits per coordinate', THEME.c.mute, { align: 'center', font: '10px "JetBrains Mono", monospace' });
+      }
+      return { enter() { render(); }, resize() { render(); } };
+    })());
+
+    regSlide('s-engramresults', {
+      enter() { document.querySelectorAll('#engram-bars i').forEach((i, k) => { i.style.width = '0%'; setTimeout(() => { i.style.width = i.dataset.v + '%'; }, 80 + k * 110); }); },
+      leave() { document.querySelectorAll('#engram-bars i').forEach(i => i.style.width = '0%'); }
+    });
+
+    /* ===================== A1c - one fixed grid, set by the widest coordinate ===================== */
+    regSlide('s-widegrid', (function () {
+      const cv = $('wg-cv'); if (!cv) return {};
+      const D = 16, OUT = 5; let mag = 3.6, bits = 4, LV = 16;
+      const smalls = []; _seed = 4242;
+      for (let i = 0; i < D; i++) smalls.push(0.05 + srand() * 0.34);
+      const avgSmall = smalls.reduce((a, b) => a + b, 0) / D;
+      const val = i => i === OUT ? mag : smalls[i];
+      function render() {
+        const { ctx, w, h } = setupCanvas(cv); clearCanvas(ctx, w, h);
+        const V = makeView(w, h, { l: 16, r: 16, t: 26, b: 28 }, 0, D, 0, mag * 1.1);
+        const step = mag / (LV - 1), q = v => Math.max(0, Math.min(LV - 1, Math.round(v / step))) * step;
+        for (let k = 0; k < LV; k++) { const ly = k * step; dashed(ctx, V.X(0), V.Y(ly), V.X(D), V.Y(ly), rgba(THEME.c.mute, 0.18), 1, [3, 4]); }
+        const bw = (V.X(1) - V.X(0)) * 0.5; let lost = 0; const used = new Set();
+        for (let i = 0; i < D; i++) {
+          const v = val(i), qv = q(v), kx = V.X(i + 0.5);
+          ctx.fillStyle = i === OUT ? THEME.c.amber : rgba(THEME.c.amber, 0.5); ctx.fillRect(kx - bw / 2, V.Y(v), bw, V.Y(0) - V.Y(v));
+          ctx.strokeStyle = THEME.c.green; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(kx - bw / 2, V.Y(qv)); ctx.lineTo(kx + bw / 2, V.Y(qv)); ctx.stroke();
+          if (Math.abs(v - qv) > step * 0.04) { ctx.strokeStyle = rgba(THEME.c.red, 0.85); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(kx, V.Y(v)); ctx.lineTo(kx, V.Y(qv)); ctx.stroke(); }
+          const lvl = Math.max(0, Math.min(LV - 1, Math.round(v / step))); used.add(lvl);
+          if (i !== OUT && lvl === 0) lost++;
+        }
+        label(ctx, V.X(OUT + 0.5), V.Y(mag) - 8, 'outlier', THEME.c.amber, { align: 'center', font: '10px "JetBrains Mono", monospace' });
+        label(ctx, V.X(0) + 4, V.Y(mag * 1.02), '', THEME.c.dim, { font: '10px "JetBrains Mono", monospace' });
+        T_('wg-lost', lost + ' / ' + (D - 1)); T_('wg-used', used.size + ' / ' + LV);
+      }
+      function setBits(b) { bits = b; LV = Math.pow(2, b); const cap = $('wg-cap'); if (cap) cap.innerHTML = '<b>ONE GRID</b> · ' + LV + ' levels for every coordinate'; const wr = $('wg-bits'); if (wr) wr.querySelectorAll('.btn').forEach(btn => { const on = +btn.dataset.bits === b; btn.classList.toggle('on', on); btn.classList.toggle('ghost', !on); }); render(); }
+      $('wg-out').oninput = e => { mag = 0.7 + (+e.target.value) / 100 * 5.3; T_('wg-outv', Math.round(mag / avgSmall) + 'x'); render(); };
+      const wb = $('wg-bits'); if (wb) wb.querySelectorAll('.btn').forEach(btn => btn.onclick = () => setBits(+btn.dataset.bits));
+      return { enter() { T_('wg-outv', Math.round(mag / avgSmall) + 'x'); setBits(bits); }, resize() { render(); } };
+    })());
+
+    /* BUILD:DEMOS */
+  </script>
+</body>
+
+</html>
