@@ -45,42 +45,114 @@
       --c-mute: #5d6a81;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
-    html, body {
-      margin: 0; padding: 0; height: 100%;
-      background: var(--bg); color: var(--text);
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
       font-family: "Space Grotesk", -apple-system, system-ui, sans-serif;
       overflow: hidden;
     }
 
-    .slide[data-accent="amber"] { --accent: var(--amber); --accent-rgb: 245, 166, 35; }
-    .slide[data-accent="blue"] { --accent: var(--blue); --accent-rgb: 109, 176, 245; }
-    .slide[data-accent="purple"] { --accent: var(--purple); --accent-rgb: 167, 139, 250; }
-    .slide[data-accent="green"] { --accent: var(--green); --accent-rgb: 70, 208, 127; }
+    .slide[data-accent="amber"] {
+      --accent: var(--amber);
+      --accent-rgb: 245, 166, 35;
+    }
 
-    .deck { position: fixed; inset: 0; }
+    .slide[data-accent="blue"] {
+      --accent: var(--blue);
+      --accent-rgb: 109, 176, 245;
+    }
+
+    .slide[data-accent="purple"] {
+      --accent: var(--purple);
+      --accent-rgb: 167, 139, 250;
+    }
+
+    .slide[data-accent="green"] {
+      --accent: var(--green);
+      --accent-rgb: 70, 208, 127;
+    }
+
+    .deck {
+      position: fixed;
+      inset: 0;
+    }
 
     /* instrument bezel + corner brackets (the signature frame) */
-    #frame { position: fixed; inset: 16px; border: 1px solid var(--line); border-radius: 3px; pointer-events: none; z-index: 40; }
-    #frame i { position: absolute; width: 15px; height: 15px; border-color: var(--line2); border-style: solid; }
-    #frame i.f-tl { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; }
-    #frame i.f-tr { top: -1px; right: -1px; border-width: 1.5px 1.5px 0 0; }
-    #frame i.f-bl { bottom: -1px; left: -1px; border-width: 0 0 1.5px 1.5px; }
-    #frame i.f-br { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; }
+    #frame {
+      position: fixed;
+      inset: 16px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    #frame i {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-color: var(--line2);
+      border-style: solid;
+    }
+
+    #frame i.f-tl {
+      top: -1px;
+      left: -1px;
+      border-width: 1.5px 0 0 1.5px;
+    }
+
+    #frame i.f-tr {
+      top: -1px;
+      right: -1px;
+      border-width: 1.5px 1.5px 0 0;
+    }
+
+    #frame i.f-bl {
+      bottom: -1px;
+      left: -1px;
+      border-width: 0 0 1.5px 1.5px;
+    }
+
+    #frame i.f-br {
+      bottom: -1px;
+      right: -1px;
+      border-width: 0 1.5px 1.5px 0;
+    }
 
     .slide {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column; justify-content: center;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       padding: 9vh 9vw 11vh;
-      opacity: 0; transform: translateY(8px);
+      opacity: 0;
+      transform: translateY(8px);
       transition: opacity .42s ease, transform .42s ease;
-      pointer-events: none; overflow: hidden;
+      pointer-events: none;
+      overflow: hidden;
     }
-    .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+
+    .slide.active {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
 
     .slide::before {
-      content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
       background-image:
         linear-gradient(rgba(var(--accent-rgb), 0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(var(--accent-rgb), 0.025) 1px, transparent 1px);
@@ -88,165 +160,837 @@
       mask-image: radial-gradient(ellipse 80% 75% at 50% 50%, #000 45%, transparent 100%);
       -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 50%, #000 45%, transparent 100%);
     }
-    .slide > * { position: relative; z-index: 1; }
+
+    .slide>* {
+      position: relative;
+      z-index: 1;
+    }
 
     /* eyebrow: PART NN · LAYER */
     .kicker {
       font-family: "JetBrains Mono", monospace;
-      font-size: clamp(10px, 1.05vw, 13.5px); font-weight: 500;
-      letter-spacing: 0.3em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 1.6vh;
-      display: inline-flex; align-items: center; gap: 12px;
+      font-size: clamp(10px, 1.05vw, 13.5px);
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.6vh;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
     }
-    .kicker::before { content: ""; width: 8px; height: 8px; background: var(--accent); box-shadow: 0 0 9px var(--accent); }
-    .rule { height: 1px; background: var(--line); width: 100%; max-width: 60vw; margin: 0 0 3.2vh; position: relative; }
-    .rule::before { content: ""; position: absolute; left: 0; top: 0; width: 64px; height: 1px; background: var(--accent); }
+
+    .kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 9px var(--accent);
+    }
+
+    .rule {
+      height: 1px;
+      background: var(--line);
+      width: 100%;
+      max-width: 60vw;
+      margin: 0 0 3.2vh;
+      position: relative;
+    }
+
+    .rule::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 64px;
+      height: 1px;
+      background: var(--accent);
+    }
 
     h1 {
-      font-family: "Space Grotesk", sans-serif; font-weight: 600;
-      font-size: clamp(44px, 8.5vw, 132px); line-height: 0.95;
-      letter-spacing: -0.035em; margin: 0; color: var(--text);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      font-size: clamp(44px, 8.5vw, 132px);
+      line-height: 0.95;
+      letter-spacing: -0.035em;
+      margin: 0;
+      color: var(--text);
     }
-    h2 {
-      font-family: "Space Grotesk", sans-serif; font-weight: 500;
-      font-size: clamp(28px, 4.6vw, 66px); line-height: 1.02;
-      letter-spacing: -0.025em; margin: 0 0 3vh; color: var(--text); max-width: 18ch;
-    }
-    h2.wide { max-width: 24ch; }
-    .acc { color: var(--accent); }
-    .lead {
-      font-size: clamp(16px, 1.75vw, 25px); line-height: 1.5; color: var(--dim);
-      font-weight: 400; max-width: 30ch;
-    }
-    .lead.wide { max-width: 46ch; }
-    .lead b { color: var(--text); font-weight: 600; }
-    p { margin: 0 0 1.1em; color: var(--dim); line-height: 1.55; }
-    b, strong { color: var(--text); font-weight: 600; }
-    .mono { font-family: "JetBrains Mono", monospace; }
-    .footer-note {
-      font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 0.95vw, 13px);
-      color: var(--mute); letter-spacing: 0.04em; margin-top: 3.4vh;
-    }
-    .footer-note b { color: var(--dim); font-weight: 500; }
 
-    .stat {
-      font-family: "Space Grotesk", sans-serif; font-weight: 700;
-      font-size: clamp(72px, 15vw, 230px); line-height: 0.86; letter-spacing: -0.045em;
+    h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 500;
+      font-size: clamp(28px, 4.6vw, 66px);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
+      margin: 0 0 3vh;
+      color: var(--text);
+      max-width: 18ch;
+    }
+
+    h2.wide {
+      max-width: 24ch;
+    }
+
+    .acc {
       color: var(--accent);
     }
-    .stat-sub { font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 1.3vw, 17px); color: var(--mute); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 2vh; }
 
-    .row { display: flex; gap: 3vw; align-items: center; }
-    .row.top { align-items: flex-start; }
-    .grow { flex: 1 1 0; min-width: 0; }
-    .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.4vw; }
-    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2.6vw; align-items: center; }
-    .cols2.demo-left { grid-template-columns: 1.4fr 1fr; }
+    .lead {
+      font-size: clamp(16px, 1.75vw, 25px);
+      line-height: 1.5;
+      color: var(--dim);
+      font-weight: 400;
+      max-width: 30ch;
+    }
+
+    .lead.wide {
+      max-width: 46ch;
+    }
+
+    .lead b {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0 0 1.1em;
+      color: var(--dim);
+      line-height: 1.55;
+    }
+
+    b,
+    strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .footer-note {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 0.95vw, 13px);
+      color: var(--mute);
+      letter-spacing: 0.04em;
+      margin-top: 3.4vh;
+    }
+
+    .footer-note b {
+      color: var(--dim);
+      font-weight: 500;
+    }
+
+    .stat {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: clamp(72px, 15vw, 230px);
+      line-height: 0.86;
+      letter-spacing: -0.045em;
+      color: var(--accent);
+    }
+
+    .stat-sub {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(11px, 1.3vw, 17px);
+      color: var(--mute);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-top: 2vh;
+    }
+
+    .row {
+      display: flex;
+      gap: 3vw;
+      align-items: center;
+    }
+
+    .row.top {
+      align-items: flex-start;
+    }
+
+    .grow {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .cols3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.4vw;
+    }
+
+    .cols2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.6vw;
+      align-items: center;
+    }
+
+    .cols2.demo-left {
+      grid-template-columns: 1.4fr 1fr;
+    }
 
     /* cards with corner brackets */
     .card {
       background: linear-gradient(180deg, var(--panel) 0%, var(--bg2) 100%);
-      border: 1px solid var(--line); border-radius: 3px; padding: 2.4vh 1.5vw; position: relative;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 2.4vh 1.5vw;
+      position: relative;
     }
-    .card::before, .card::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--accent); border-style: solid; }
-    .card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
-    .card::after { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
-    .card .cl { font-family: "JetBrains Mono", monospace; font-size: clamp(9.5px, 0.9vw, 12px); letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute); margin-bottom: 1.4vh; }
-    .card .cw { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: clamp(26px, 3.3vw, 50px); letter-spacing: -0.02em; color: var(--accent); line-height: 1; }
-    .card .cb { font-size: clamp(13px, 1.2vw, 16.5px); color: var(--dim); line-height: 1.5; margin-top: 1.4vh; }
-    .card .cp { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 0.95vw, 12.5px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-top: 1.6vh; }
 
-    .tag { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 0.95vw, 12.5px); letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 11px; border: 1px solid var(--line2); border-radius: 3px; color: var(--dim); }
-    .tag.on { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
-    .pillrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.4vh; }
+    .card::before,
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: var(--accent);
+      border-style: solid;
+    }
 
-    .seq { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-family: "JetBrains Mono", monospace; }
-    .tok { display: inline-block; padding: 6px 11px; border: 1px solid var(--line2); border-radius: 4px; font-size: clamp(13px, 1.3vw, 17px); color: var(--dim); background: var(--panel); }
-    .tok.hot { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
-    .tok.out { color: var(--green); border-color: rgba(70, 208, 127, 0.5); background: rgba(70, 208, 127, 0.09); }
-    .tok.arr { border: none; background: none; color: var(--mute); padding: 6px 2px; }
+    .card::before {
+      top: -1px;
+      left: -1px;
+      border-width: 1px 0 0 1px;
+    }
 
-    .bars { display: flex; flex-direction: column; gap: 1.1vh; }
-    .barline { display: grid; grid-template-columns: 10vw 1fr auto; align-items: center; gap: 1vw; font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 1.15vw, 15px); }
-    .barline .nm { color: var(--dim); text-align: right; }
-    .barline .track { height: clamp(13px, 1.7vh, 20px); background: var(--panel); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
-    .barline .track > i { display: block; height: 100%; background: var(--mute2); transition: width .8s cubic-bezier(.2,.8,.2,1); }
-    .barline.win .track > i { background: var(--green); }
-    .barline .vv { color: var(--text); min-width: 4ch; }
-    .barline.win .vv { color: var(--green); }
+    .card::after {
+      top: -1px;
+      right: -1px;
+      border-width: 1px 1px 0 0;
+    }
 
-    .stage { position: relative; background: var(--c-bg); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; width: 100%; height: 100%; }
-    .stage::before, .stage::after { content: ""; position: absolute; width: 9px; height: 9px; border-color: var(--accent); border-style: solid; z-index: 3; }
-    .stage::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
-    .stage::after { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
-    .stage canvas { display: block; width: 100%; height: 100%; }
-    .stage .cap { position: absolute; top: 12px; left: 16px; font-family: "JetBrains Mono", monospace; font-size: clamp(9px, 0.9vw, 12px); letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); z-index: 2; }
-    .stage .cap b { color: var(--accent); font-weight: 500; }
-    .stage .hint { position: absolute; bottom: 12px; left: 16px; font-family: "JetBrains Mono", monospace; font-size: clamp(9px, 0.85vw, 11px); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); background: rgba(7, 9, 14, 0.72); padding: 4px 9px; border-radius: 4px; border: 1px solid rgba(var(--accent-rgb), 0.35); pointer-events: none; z-index: 2; }
-    .stagewrap { height: 54vh; }
-    .stagewrap.tall { height: 61vh; }
+    .card .cl {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(9.5px, 0.9vw, 12px);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 1.4vh;
+    }
 
-    .ctl { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 1.6vh; }
-    button.btn { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 1.05vw, 13.5px); letter-spacing: 0.1em; text-transform: uppercase; background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 8px 15px; border-radius: 4px; cursor: pointer; transition: background .15s; }
-    button.btn:hover { background: rgba(var(--accent-rgb), 0.12); }
-    button.btn.ghost { color: var(--dim); border-color: var(--line2); }
-    button.btn.ghost:hover { color: var(--text); border-color: var(--mute); }
-    button.btn.on { background: rgba(var(--accent-rgb), 0.16); }
-    .ctl label { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 1vw, 13px); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 10px; }
-    input[type=range] { -webkit-appearance: none; appearance: none; width: clamp(120px, 13vw, 210px); height: 2px; background: var(--line2); outline: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; background: var(--accent); cursor: pointer; transform: rotate(45deg); box-shadow: 0 0 9px rgba(var(--accent-rgb), 0.6); }
-    input[type=range]::-moz-range-thumb { width: 13px; height: 13px; background: var(--accent); border: none; cursor: pointer; transform: rotate(45deg); }
-    .val { font-family: "JetBrains Mono", monospace; color: var(--accent); min-width: 4ch; }
+    .card .cw {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: clamp(26px, 3.3vw, 50px);
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      line-height: 1;
+    }
 
-    .tiles { display: flex; gap: 12px; flex-wrap: wrap; }
-    .tile { flex: 1 1 0; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-left: 2px solid var(--accent); border-radius: 3px; padding: 1.2vh 1vw; }
-    .tile .tl { font-family: "JetBrains Mono", monospace; font-size: clamp(9px, 0.85vw, 11px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--mute); }
-    .tile .tv { font-family: "JetBrains Mono", monospace; font-size: clamp(20px, 2.3vw, 32px); color: var(--text); margin-top: 3px; line-height: 1; }
+    .card .cb {
+      font-size: clamp(13px, 1.2vw, 16.5px);
+      color: var(--dim);
+      line-height: 1.5;
+      margin-top: 1.4vh;
+    }
 
-    #progress { position: fixed; left: 0; bottom: 0; height: 2px; background: var(--accent); width: 0; z-index: 50; transition: width .42s ease; box-shadow: 0 0 8px var(--accent); }
-    #counter { position: fixed; right: 34px; top: 30px; font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--mute); letter-spacing: 0.12em; z-index: 50; }
-    #counter b { color: var(--accent); }
+    .card .cp {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 0.95vw, 12.5px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-top: 1.6vh;
+    }
 
-    #rail { position: fixed; left: 34px; bottom: 28px; display: flex; gap: 18px; z-index: 50; font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: 0.16em; }
-    #rail .seg { color: var(--mute2); text-transform: lowercase; display: flex; align-items: center; gap: 8px; transition: color .4s; }
-    #rail .seg::after { content: "○"; font-size: 9px; }
-    #rail .seg.on { text-transform: uppercase; }
-    #rail .seg.s1.on { color: var(--amber); } #rail .seg.s1.on::after { content: "●"; }
-    #rail .seg.s2.on { color: var(--blue); } #rail .seg.s2.on::after { content: "●"; }
-    #rail .seg.s3.on { color: var(--purple); } #rail .seg.s3.on::after { content: "●"; }
+    .tag {
+      display: inline-block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 0.95vw, 12.5px);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 11px;
+      border: 1px solid var(--line2);
+      border-radius: 3px;
+      color: var(--dim);
+    }
 
-    #hint { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: var(--mute2); letter-spacing: 0.1em; z-index: 50; transition: opacity .6s; }
-    #hint.hide { opacity: 0; pointer-events: none; }
+    .tag.on {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.08);
+    }
 
-    #notes { position: fixed; right: 30px; bottom: 56px; width: min(440px, 42vw); max-height: 52vh; overflow: auto; background: var(--panel2); border: 1px solid var(--line2); border-radius: 6px; padding: 16px 18px; z-index: 60; display: none; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); font-size: 14px; line-height: 1.55; color: var(--dim); }
-    #notes.show { display: block; }
-    #notes h4 { margin: 0 0 8px; font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
-    .notes { display: none; }
+    .pillrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 1.4vh;
+    }
+
+    .seq {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .tok {
+      display: inline-block;
+      padding: 6px 11px;
+      border: 1px solid var(--line2);
+      border-radius: 4px;
+      font-size: clamp(13px, 1.3vw, 17px);
+      color: var(--dim);
+      background: var(--panel);
+    }
+
+    .tok.hot {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+
+    .tok.out {
+      color: var(--green);
+      border-color: rgba(70, 208, 127, 0.5);
+      background: rgba(70, 208, 127, 0.09);
+    }
+
+    .tok.arr {
+      border: none;
+      background: none;
+      color: var(--mute);
+      padding: 6px 2px;
+    }
+
+    .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1vh;
+    }
+
+    .barline {
+      display: grid;
+      grid-template-columns: 10vw 1fr auto;
+      align-items: center;
+      gap: 1vw;
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(11px, 1.15vw, 15px);
+    }
+
+    .barline .nm {
+      color: var(--dim);
+      text-align: right;
+    }
+
+    .barline .track {
+      height: clamp(13px, 1.7vh, 20px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .barline .track>i {
+      display: block;
+      height: 100%;
+      background: var(--mute2);
+      transition: width .8s cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .barline.win .track>i {
+      background: var(--green);
+    }
+
+    .barline .vv {
+      color: var(--text);
+      min-width: 4ch;
+    }
+
+    .barline.win .vv {
+      color: var(--green);
+    }
+
+    .stage {
+      position: relative;
+      background: var(--c-bg);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    .stage::before,
+    .stage::after {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-color: var(--accent);
+      border-style: solid;
+      z-index: 3;
+    }
+
+    .stage::before {
+      top: 0;
+      left: 0;
+      border-width: 1px 0 0 1px;
+    }
+
+    .stage::after {
+      bottom: 0;
+      right: 0;
+      border-width: 0 1px 1px 0;
+    }
+
+    .stage canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .stage .cap {
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(9px, 0.9vw, 12px);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mute);
+      z-index: 2;
+    }
+
+    .stage .cap b {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .stage .hint {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(9px, 0.85vw, 11px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(7, 9, 14, 0.72);
+      padding: 4px 9px;
+      border-radius: 4px;
+      border: 1px solid rgba(var(--accent-rgb), 0.35);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .stagewrap {
+      height: 54vh;
+    }
+
+    .stagewrap.tall {
+      height: 61vh;
+    }
+
+    .ctl {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      margin-top: 1.6vh;
+    }
+
+    button.btn {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 1.05vw, 13.5px);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    button.btn:hover {
+      background: rgba(var(--accent-rgb), 0.12);
+    }
+
+    button.btn.ghost {
+      color: var(--dim);
+      border-color: var(--line2);
+    }
+
+    button.btn.ghost:hover {
+      color: var(--text);
+      border-color: var(--mute);
+    }
+
+    button.btn.on {
+      background: rgba(var(--accent-rgb), 0.16);
+    }
+
+    .ctl label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 1vw, 13px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: clamp(120px, 13vw, 210px);
+      height: 2px;
+      background: var(--line2);
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      background: var(--accent);
+      cursor: pointer;
+      transform: rotate(45deg);
+      box-shadow: 0 0 9px rgba(var(--accent-rgb), 0.6);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 13px;
+      height: 13px;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      transform: rotate(45deg);
+    }
+
+    .val {
+      font-family: "JetBrains Mono", monospace;
+      color: var(--accent);
+      min-width: 4ch;
+    }
+
+    .tiles {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tile {
+      flex: 1 1 0;
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--accent);
+      border-radius: 3px;
+      padding: 1.2vh 1vw;
+    }
+
+    .tile .tl {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(9px, 0.85vw, 11px);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    .tile .tv {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(20px, 2.3vw, 32px);
+      color: var(--text);
+      margin-top: 3px;
+      line-height: 1;
+    }
+
+    #progress {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--accent);
+      width: 0;
+      z-index: 50;
+      transition: width .42s ease;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    #counter {
+      position: fixed;
+      right: 34px;
+      top: 30px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      color: var(--mute);
+      letter-spacing: 0.12em;
+      z-index: 50;
+    }
+
+    #counter b {
+      color: var(--accent);
+    }
+
+    #rail {
+      position: fixed;
+      left: 34px;
+      bottom: 28px;
+      display: flex;
+      gap: 18px;
+      z-index: 50;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.16em;
+    }
+
+    #rail .seg {
+      color: var(--mute2);
+      text-transform: lowercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color .4s;
+    }
+
+    #rail .seg::after {
+      content: "○";
+      font-size: 9px;
+    }
+
+    #rail .seg.on {
+      text-transform: uppercase;
+    }
+
+    #rail .seg.s1.on {
+      color: var(--amber);
+    }
+
+    #rail .seg.s1.on::after {
+      content: "●";
+    }
+
+    #rail .seg.s2.on {
+      color: var(--blue);
+    }
+
+    #rail .seg.s2.on::after {
+      content: "●";
+    }
+
+    #rail .seg.s3.on {
+      color: var(--purple);
+    }
+
+    #rail .seg.s3.on::after {
+      content: "●";
+    }
+
+    #hint {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10.5px;
+      color: var(--mute2);
+      letter-spacing: 0.1em;
+      z-index: 50;
+      transition: opacity .6s;
+    }
+
+    #hint.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #notes {
+      position: fixed;
+      right: 30px;
+      bottom: 56px;
+      width: min(440px, 42vw);
+      max-height: 52vh;
+      overflow: auto;
+      background: var(--panel2);
+      border: 1px solid var(--line2);
+      border-radius: 6px;
+      padding: 16px 18px;
+      z-index: 60;
+      display: none;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--dim);
+    }
+
+    #notes.show {
+      display: block;
+    }
+
+    #notes h4 {
+      margin: 0 0 8px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .notes {
+      display: none;
+    }
 
     /* Engram: entity-assembly table + arch stacks */
-    .reveal { opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
-    .reveal.show { opacity: 1; transform: none; }
-    .erow { display: grid; grid-template-columns: 11ch 1fr; gap: 1.4vw; align-items: baseline; padding: 1.15vh 0; border-bottom: 1px solid var(--line); }
-    .erow .el { font-family: "JetBrains Mono", monospace; font-size: clamp(10px, 1vw, 13px); letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
-    .erow .ev { font-size: clamp(15px, 1.7vw, 23px); color: var(--dim); }
-    .erow.final { border-bottom: none; }
-    .erow.final .ev { color: var(--accent); font-weight: 600; }
-    .stack { display: flex; flex-direction: column; gap: 6px; }
-    .blk { font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 1.1vw, 14px); padding: 9px 12px; border: 1px solid var(--line2); border-radius: 4px; color: var(--dim); text-align: center; background: var(--panel); }
-    .blk.hot { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
-    .blk.tiny { font-size: 10px; color: var(--mute); border: none; background: none; padding: 2px; }
-    .tok.warm { color: var(--dim); border-color: var(--line2); background: rgba(var(--accent-rgb), 0.06); }
+    .reveal {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: none;
+    }
+
+    .erow {
+      display: grid;
+      grid-template-columns: 11ch 1fr;
+      gap: 1.4vw;
+      align-items: baseline;
+      padding: 1.15vh 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .erow .el {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(10px, 1vw, 13px);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    .erow .ev {
+      font-size: clamp(15px, 1.7vw, 23px);
+      color: var(--dim);
+    }
+
+    .erow.final {
+      border-bottom: none;
+    }
+
+    .erow.final .ev {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .blk {
+      font-family: "JetBrains Mono", monospace;
+      font-size: clamp(11px, 1.1vw, 14px);
+      padding: 9px 12px;
+      border: 1px solid var(--line2);
+      border-radius: 4px;
+      color: var(--dim);
+      text-align: center;
+      background: var(--panel);
+    }
+
+    .blk.hot {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+
+    .blk.tiny {
+      font-size: 10px;
+      color: var(--mute);
+      border: none;
+      background: none;
+      padding: 2px;
+    }
+
+    .tok.warm {
+      color: var(--dim);
+      border-color: var(--line2);
+      background: rgba(var(--accent-rgb), 0.06);
+    }
 
     @media (max-width: 760px) {
-      .cols3 { grid-template-columns: 1fr; } .cols2, .cols2.demo-left { grid-template-columns: 1fr; }
-      #rail { display: none; } .stagewrap { height: 44vh; } .slide { padding: 8vh 7vw 12vh; }
+      .cols3 {
+        grid-template-columns: 1fr;
+      }
+
+      .cols2,
+      .cols2.demo-left {
+        grid-template-columns: 1fr;
+      }
+
+      #rail {
+        display: none;
+      }
+
+      .stagewrap {
+        height: 44vh;
+      }
+
+      .slide {
+        padding: 8vh 7vw 12vh;
+      }
     }
-    @media (prefers-reduced-motion: reduce) { .slide { transition: opacity .2s; transform: none !important; } .barline .track > i { transition: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide {
+        transition: opacity .2s;
+        transform: none !important;
+      }
+
+      .barline .track>i {
+        transition: none;
+      }
+    }
+
     @media print {
-      html, body { overflow: visible; height: auto; background: #fff; }
-      .deck { position: static; } #progress, #counter, #rail, #hint, #notes, #frame { display: none !important; }
-      .slide { position: relative; inset: auto; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; }
-      .notes { display: block; margin-top: 12px; color: #333; }
+
+      html,
+      body {
+        overflow: visible;
+        height: auto;
+        background: #fff;
+      }
+
+      .deck {
+        position: static;
+      }
+
+      #progress,
+      #counter,
+      #rail,
+      #hint,
+      #notes,
+      #frame {
+        display: none !important;
+      }
+
+      .slide {
+        position: relative;
+        inset: auto;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always;
+        height: 100vh;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .notes {
+        display: block;
+        margin-top: 12px;
+        color: #333;
+      }
     }
   </style>
 </head>
@@ -261,8 +1005,10 @@
         <div class="kicker">a talk in three acts</div>
         <h1>Less is more.</h1>
         <div class="lead wide" style="margin-top:3.4vh;max-width:42ch">
-          In this talk, we will look at three interesting techniques: one explores how we can reduce the memory footprint of vectors, another shines light on how geometric constraints can enable training with less data and the last one rethinks the architecture of large models to get more out of the same compute budget.
-          </div>
+          In this talk, we will look at three interesting techniques: one explores how we can reduce the memory
+          footprint of vectors, another shines light on how geometric constraints can enable training with less data and
+          the last one rethinks the architecture of large models to get more out of the same compute budget.
+        </div>
       </div>
       <div class="notes">Open here. The whole talk is one argument: the next leap may not be more scale, but noticing
         where representations are wasteful, and that waste has exploitable geometric structure. Three papers, three
@@ -273,8 +1019,10 @@
       <div class="kicker">the bet that worked</div>
       <div class="stat">$100M</div>
       <div class="stat-sub">to train gpt-4</div>
-      <div class="lead wide" style="margin-top:5vh">This shows that scaling worked and the instinct is to keep pouring in more resources. Bigger
-        models, more data, and more GPUs. <b> But there is a lot of room to improve by making things more efficient and effective.</b></div>
+      <div class="lead wide" style="margin-top:5vh">This shows that scaling worked and the instinct is to keep pouring
+        in more resources. Bigger
+        models, more data, and more GPUs. <b> But there is a lot of room to improve by making things more efficient and
+          effective.</b></div>
       <div class="notes">The scaling bet was right and paid for itself. But "bigger" is not the only axis. Set up the
         turn: instead of adding capacity, find where the model is wasteful. Hold on the number for a beat.</div>
     </section>
@@ -283,19 +1031,22 @@
       <div class="kicker" style="color:var(--text)">the diagnosis</div>
       <h2 class="wide" style="margin-bottom:1.2vh">Cost in three directions</h2>
       <div class="cols3">
-        <div class="card" data-accent="amber" style="--accent:var(--amber);--accent-rgb:245,166,35;border-top:2px solid var(--amber)">
+        <div class="card" data-accent="amber"
+          style="--accent:var(--amber);--accent-rgb:245,166,35;border-top:2px solid var(--amber)">
           <div class="cl">cost 01 · inference</div>
           <div class="cw">Memory</div>
           <div class="cb">The KV cache grows with every token.</div>
           <div class="cp">TurboQuant, DRIVE, EDEN, RaBitQ</div>
         </div>
-        <div class="card" data-accent="blue" style="--accent:var(--blue);--accent-rgb:109,176,245;border-top:2px solid var(--blue)">
+        <div class="card" data-accent="blue"
+          style="--accent:var(--blue);--accent-rgb:109,176,245;border-top:2px solid var(--blue)">
           <div class="cl">cost 02 · training</div>
           <div class="cw">Data</div>
           <div class="cb">Training seems to want a mountain of examples.</div>
           <div class="cp">semantic tube</div>
         </div>
-        <div class="card" data-accent="purple" style="--accent:var(--purple);--accent-rgb:167,139,250;border-top:2px solid var(--purple)">
+        <div class="card" data-accent="purple"
+          style="--accent:var(--purple);--accent-rgb:167,139,250;border-top:2px solid var(--purple)">
           <div class="cl">cost 03 · architecture</div>
           <div class="cw">Depth</div>
           <div class="cb">Layers go to rebuilding facts.</div>
@@ -317,8 +1068,10 @@
           <div class="lead">The first cost is memory. To write each token, attention reads every earlier one, so the
             model caches a key and a value per token, per layer, per head. That pile grows with the
             context.</div>
-          <div class="footer-note">Served at scale, memory requirement for KV cache can pass the weights. However, the attention mechanism only cares about
-            <b>inner product</b> between key and query <b>vectors</b>.</div>
+          <div class="footer-note">Served at scale, memory requirement for KV cache can pass the weights. However, the
+            attention mechanism only cares about
+            <b>inner product</b> between key and query <b>vectors</b>.
+          </div>
         </div>
         <div class="stagewrap">
           <div class="stage">
@@ -327,7 +1080,8 @@
           </div>
         </div>
       </div>
-      <div class="ctl"><label>context length <input id="kv-len" type="range" min="0" max="100" value="38"><span class="val" id="kv-lenv">8k</span></label></div>
+      <div class="ctl"><label>context length <input id="kv-len" type="range" min="0" max="100" value="38"><span
+            class="val" id="kv-lenv">8k</span></label></div>
       <div class="notes">Frame the cost. The cache is linear in context and at long context it passes the weights.
         INT4 is the obvious 4x win. Tee up why it fails: outliers. Slide the context to show the crossover.</div>
     </section>
@@ -337,17 +1091,28 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap" id="quant-cap"><b>4 bits</b> = 16 levels</span><canvas id="quant-cv"></canvas></div>
+          <div class="stage"><span class="cap" id="quant-cap"><b>4 bits</b> = 16 levels</span><canvas
+              id="quant-cv"></canvas></div>
         </div>
         <div>
           <h2>Vector Quantization: what does quantize even mean?</h2>
           <div class="lead">Round each number to the nearest of a few fixed levels. Each bit doubles them: two bits
             give four, four bits give sixteen. The gap is the error you pay.</div>
-          <div class="ctl" id="quant-bits" style="margin-bottom:0.2vh"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button><button class="btn on" data-bits="4">4 bit</button></div>
-          <div class="ctl"><label>value <input id="quant-v" type="range" min="0" max="100" value="63"><span class="val" id="quant-vv">0.00</span></label></div>
+          <div class="ctl" id="quant-bits" style="margin-bottom:0.2vh"><span
+              style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button
+              class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3
+              bit</button><button class="btn on" data-bits="4">4 bit</button></div>
+          <div class="ctl"><label>value <input id="quant-v" type="range" min="0" max="100" value="63"><span class="val"
+                id="quant-vv">0.00</span></label></div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile"><div class="tl">stored value</div><div class="tv" id="quant-stored">0.00</div></div>
-            <div class="tile" style="border-left-color:var(--red)"><div class="tl">rounding error</div><div class="tv" id="quant-err" style="color:var(--red)">0.00</div></div>
+            <div class="tile">
+              <div class="tl">stored value</div>
+              <div class="tv" id="quant-stored">0.00</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--red)">
+              <div class="tl">rounding error</div>
+              <div class="tv" id="quant-err" style="color:var(--red)">0.00</div>
+            </div>
           </div>
         </div>
       </div>
@@ -361,20 +1126,38 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap" id="wg-cap"><b>ONE GRID</b> · 16 levels for every coordinate</span><canvas id="wg-cv"></canvas></div>
+          <div class="stage"><span class="cap" id="wg-cap"><b>ONE GRID</b> · 16 levels for every
+              coordinate</span><canvas id="wg-cv"></canvas></div>
         </div>
         <div>
           <h2>A fixed grid is only as good as its widest coordinate.</h2>
-          <div class="lead">Real key and query vectors are lopsided. Whatever budget of levels you pick, they all have to stretch up to that one outlier, so the small coordinates collapse onto the bottom and round to almost nothing. More bits cannot fix a bad shape.</div>
-          <div class="ctl" id="wg-bits"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">levels</span><button class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button><button class="btn on" data-bits="4">4 bit</button><label style="margin-left:1.2vw">outlier size <input id="wg-out" type="range" min="0" max="100" value="55"><span class="val" id="wg-outv">16x</span></label></div>
+          <div class="lead">Real key and query vectors are lopsided. Whatever budget of levels you pick, they all have
+            to stretch up to that one outlier, so the small coordinates collapse onto the bottom and round to almost
+            nothing. More bits cannot fix a bad shape.</div>
+          <div class="ctl" id="wg-bits"><span
+              style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">levels</span><button
+              class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3
+              bit</button><button class="btn on" data-bits="4">4 bit</button><label style="margin-left:1.2vw">outlier
+              size <input id="wg-out" type="range" min="0" max="100" value="55"><span class="val"
+                id="wg-outv">16x</span></label></div>
           <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile" style="border-left-color:var(--red)"><div class="tl">small coords lost</div><div class="tv" id="wg-lost" style="color:var(--red)">0 / 15</div></div>
-            <div class="tile"><div class="tl">levels actually used</div><div class="tv" id="wg-used">16 / 16</div></div>
+            <div class="tile" style="border-left-color:var(--red)">
+              <div class="tl">small coords lost</div>
+              <div class="tv" id="wg-lost" style="color:var(--red)">0 / 15</div>
+            </div>
+            <div class="tile">
+              <div class="tl">levels actually used</div>
+              <div class="tv" id="wg-used">16 / 16</div>
+            </div>
           </div>
         </div>
       </div>
       <div class="footer-note">So the fix is not more bits. It is to change the vector's shape before rounding.</div>
-      <div class="notes">The bridge from quantizing to rotating. One fixed grid serves the whole vector, so its level spacing is set by the largest coordinate. On a lopsided real key, the outlier stretches the grid and the small coordinates round to the same level, indistinguishable. Grow the outlier and watch the small coordinates get lost and the used levels collapse toward two. The point: you cannot bit your way out of a bad shape, so reshape the vector first. The tool is a rotation, which is the next slide.</div>
+      <div class="notes">The bridge from quantizing to rotating. One fixed grid serves the whole vector, so its level
+        spacing is set by the largest coordinate. On a lopsided real key, the outlier stretches the grid and the small
+        coordinates round to the same level, indistinguishable. Grow the outlier and watch the small coordinates get
+        lost and the used levels collapse toward two. The point: you cannot bit your way out of a bad shape, so reshape
+        the vector first. The tool is a rotation, which is the next slide.</div>
     </section>
 
     <section class="slide" id="s-rotate" data-act="storage" data-accent="amber">
@@ -383,24 +1166,34 @@
       <div class="cols2 demo-left">
         <div>
           <h2>Vector rotation to the rescue!</h2>
-          <div class="lead">Rotation leaves every inner product unchanged between vectors, so as far as the attention mechanism is concerned, the dot product looks the same. But rotation has a massive advantage which you will see next.</div>
+          <div class="lead">Rotation leaves every inner product unchanged between vectors, so as far as the attention
+            mechanism is concerned, the dot product looks the same. But rotation has a massive advantage which you will
+            see next.</div>
           <div class="card" style="margin-top:2vh;padding:1.8vh 1.4vw">
             <div class="cl">attention score, rotated</div>
-            <div class="mono" style="font-size:clamp(15px,1.7vw,22px);color:var(--text);margin-top:0.6vh">(Rq)·(Rk) = q·(RᵀR)k = q·k</div>
+            <div class="mono" style="font-size:clamp(15px,1.7vw,22px);color:var(--text);margin-top:0.6vh">(Rq)·(Rk) =
+              q·(RᵀR)k = q·k</div>
           </div>
         </div>
         <div class="stagewrap">
           <div class="stage">
             <span class="cap"><b>ROTATE</b> both vectors · score holds</span>
-            
+
             <canvas id="dot-cv"></canvas>
           </div>
         </div>
       </div>
-      <div class="ctl"><label>rotation angle <input id="dot-ang" type="range" min="0" max="100" value="20"><span class="val" id="dot-angv">0°</span></label>
-        <div class="tiles" style="flex:0 0 auto"><div class="tile" style="min-width:160px"><div class="tl">inner product q·k</div><div class="tv" id="dot-ip">0.00</div></div></div>
+      <div class="ctl"><label>rotation angle <input id="dot-ang" type="range" min="0" max="100" value="20"><span
+            class="val" id="dot-angv">0°</span></label>
+        <div class="tiles" style="flex:0 0 auto">
+          <div class="tile" style="min-width:160px">
+            <div class="tl">inner product q·k</div>
+            <div class="tv" id="dot-ip">0.00</div>
+          </div>
+        </div>
       </div>
-      <div class="footer-note">This technique of using vector rotation to make well-formed key and query vectors appears in various literature: DRIVE (arXiv 2105.08339), EDEN (2108.08842), and RaBitQ (2405.12497).</div>
+      <div class="footer-note">This technique of using vector rotation to make well-formed key and query vectors appears
+        in various literature: DRIVE (arXiv 2105.08339), EDEN (2108.08842), and RaBitQ (2405.12497).</div>
       <div class="notes">The license, placed before the dimension demos. Rotation preserves inner products (free, the
         model cannot tell) and length (energy can only spread, not grow). Demo: spin q and k, the dot product holds.
         The next three slides deliver on the promise that the energy spreads: 2D, then 3D, then high-D.</div>
@@ -411,15 +1204,25 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>TURNING A SPIKE</b> · 2 dimensions</span><canvas id="spin-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>TURNING A SPIKE</b> · 2 dimensions</span><canvas
+              id="spin-cv"></canvas></div>
         </div>
         <div>
           <h2>Vector rotation moves the energy.</h2>
-          <div class="lead">Let's start with a 2-D vector at (1,0), then rotate it so it points partway along both axes. Neither coordinate is spiky anymore, because the same fixed length has been spread across both coordinates.</div>
-          <div class="ctl"><label>turn <input id="spin-a" type="range" min="0" max="100" value="0"><span class="val" id="spin-av">0°</span></label></div>
+          <div class="lead">Let's start with a 2-D vector at (1,0), then rotate it so it points partway along both axes.
+            Neither coordinate is spiky anymore, because the same fixed length has been spread across both coordinates.
+          </div>
+          <div class="ctl"><label>turn <input id="spin-a" type="range" min="0" max="100" value="0"><span class="val"
+                id="spin-av">0°</span></label></div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">first coordinate</div><div class="tv" id="spin-c0" style="color:var(--green)">1.00</div></div>
-            <div class="tile" style="border-left-color:var(--blue)"><div class="tl">second coordinate</div><div class="tv" id="spin-c1" style="color:var(--blue)">0.00</div></div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">first coordinate</div>
+              <div class="tv" id="spin-c0" style="color:var(--green)">1.00</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--blue)">
+              <div class="tl">second coordinate</div>
+              <div class="tv" id="spin-c1" style="color:var(--blue)">0.00</div>
+            </div>
           </div>
         </div>
       </div>
@@ -434,16 +1237,24 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>SPIKE IN 3D</b> · (1,0,0) rotated</span><canvas id="spin3d-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>SPIKE IN 3D</b> · (1,0,0) rotated</span><canvas
+              id="spin3d-cv"></canvas></div>
         </div>
         <div>
           <h2>Now let's look at a three-dimensional vector</h2>
-          <div class="lead">The spike starts on x₁. A rotation splits its size across all three coordinates, drawn as the bars, and the length never moves.</div>
+          <div class="lead">The spike starts on x₁. A rotation splits its size across all three coordinates, drawn as
+            the bars, and the length never moves.</div>
           <div class="stage" style="height:16vh;margin-top:1.1vh"><canvas id="spin3d-bars"></canvas></div>
           <div class="ctl"><button class="btn" id="spin3d-go">fresh rotation</button>
             <div class="tiles" style="flex:1 1 auto">
-              <div class="tile"><div class="tl">biggest coordinate</div><div class="tv" id="spin3d-mx">1.00</div></div>
-              <div class="tile" style="border-left-color:var(--green)"><div class="tl">length</div><div class="tv" id="spin3d-len" style="color:var(--green)">1.00</div></div>
+              <div class="tile">
+                <div class="tl">biggest coordinate</div>
+                <div class="tv" id="spin3d-mx">1.00</div>
+              </div>
+              <div class="tile" style="border-left-color:var(--green)">
+                <div class="tl">length</div>
+                <div class="tv" id="spin3d-len" style="color:var(--green)">1.00</div>
+              </div>
             </div>
           </div>
         </div>
@@ -460,15 +1271,25 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>ONE COORDINATE</b> of a random direction</span><canvas id="conc-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>ONE COORDINATE</b> of a random direction</span><canvas
+              id="conc-cv"></canvas></div>
         </div>
         <div>
           <h2>What coordinates would look like in many more dimensions</h2>
-          <div class="lead">Push the dimension up and a single coordinate collapses onto one narrow bell, and it is the same bell for every coordinate, whatever the key was. So every coordinate now follows one known distribution.</div>
-          <div class="ctl"><label>dimension <input id="conc-d" type="range" min="1" max="10" value="6"><span class="val" id="conc-dv">64</span></label></div>
+          <div class="lead">Push the dimension up and a single coordinate collapses onto one narrow bell, and it is the
+            same bell for every coordinate, whatever the key was. So every coordinate now follows one known
+            distribution.</div>
+          <div class="ctl"><label>dimension <input id="conc-d" type="range" min="1" max="10" value="6"><span class="val"
+                id="conc-dv">64</span></label></div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile"><div class="tl">typical coordinate</div><div class="tv" id="conc-std">0.00</div></div>
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">1 / √d</div><div class="tv" id="conc-isqd" style="color:var(--green)">0.00</div></div>
+            <div class="tile">
+              <div class="tl">typical coordinate</div>
+              <div class="tv" id="conc-std">0.00</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">1 / √d</div>
+              <div class="tv" id="conc-isqd" style="color:var(--green)">0.00</div>
+            </div>
           </div>
         </div>
       </div>
@@ -482,22 +1303,39 @@
       <div class="kicker">part 01 · storage</div>
       <div class="rule"></div>
       <h2 class="wide" style="margin-bottom:0.5vh">Imagine a key or query vector in 64 dimensions.</h2>
-      <div class="footer-note" style="margin:0 0 1.2vh">On a real key or query vector, there can be outlier values in only a few dimensions. Quantizing these spiky vectors is highly ineffective as shown before. Therefore, we are rotating the vectors to make the values spread out and then we will effectively quantize where the majority of values lie.</div>
+      <div class="footer-note" style="margin:0 0 1.2vh">On a real key or query vector, there can be outlier values in
+        only a few dimensions. Quantizing these spiky vectors is highly ineffective as shown before. Therefore, we are
+        rotating the vectors to make the values spread out and then we will effectively quantize where the majority of
+        values lie.</div>
       <div class="row" style="gap:2vw;height:32vh">
         <div class="grow" style="height:100%">
-          <div class="stage" style="height:100%"><span class="cap"><b>BEFORE Π</b> · |xᵢ|</span><canvas id="rot-before"></canvas></div>
+          <div class="stage" style="height:100%"><span class="cap"><b>BEFORE Π</b> · |xᵢ|</span><canvas
+              id="rot-before"></canvas></div>
         </div>
         <div class="grow" style="height:100%">
-          <div class="stage" style="height:100%"><span class="cap"><b>AFTER Π</b> · |(Πx)ᵢ|</span><canvas id="rot-after"></canvas></div>
+          <div class="stage" style="height:100%"><span class="cap"><b>AFTER Π</b> · |(Πx)ᵢ|</span><canvas
+              id="rot-after"></canvas></div>
         </div>
       </div>
       <div class="ctl">
-        <label>input <select id="rot-input" style="font-family:'JetBrains Mono',monospace;background:var(--panel);color:var(--accent);border:1px solid var(--line2);border-radius:4px;padding:6px 10px;font-size:13px"><option value="spike">spike</option><option value="outlier" selected>outlier channel</option><option value="gaussian">gaussian</option></select></label>
-        <label>rotate <input id="rot-t" type="range" min="0" max="100" value="100"><span class="val" id="rot-tv">100%</span></label>
+        <label>input <select id="rot-input"
+            style="font-family:'JetBrains Mono',monospace;background:var(--panel);color:var(--accent);border:1px solid var(--line2);border-radius:4px;padding:6px 10px;font-size:13px">
+            <option value="spike">spike</option>
+            <option value="outlier" selected>outlier channel</option>
+            <option value="gaussian">gaussian</option>
+          </select></label>
+        <label>rotate <input id="rot-t" type="range" min="0" max="100" value="100"><span class="val"
+            id="rot-tv">100%</span></label>
         <button class="btn" id="rot-go">fresh rotation</button>
         <div class="tiles" style="flex:0 1 auto">
-          <div class="tile"><div class="tl">biggest |coord|</div><div class="tv"><span id="rot-bmax">0.00</span> → <span id="rot-amax">0.00</span></div></div>
-          <div class="tile" style="border-left-color:var(--green)"><div class="tl">length, unchanged</div><div class="tv" id="rot-norm" style="color:var(--green);font-size:clamp(13px,1.4vw,20px)">1.00 → 1.00</div></div>
+          <div class="tile">
+            <div class="tl">biggest |coord|</div>
+            <div class="tv"><span id="rot-bmax">0.00</span> → <span id="rot-amax">0.00</span></div>
+          </div>
+          <div class="tile" style="border-left-color:var(--green)">
+            <div class="tl">length, unchanged</div>
+            <div class="tv" id="rot-norm" style="color:var(--green);font-size:clamp(13px,1.4vw,20px)">1.00 → 1.00</div>
+          </div>
         </div>
       </div>
       <div class="notes">The problem and the tax. Left: a real key, energy piled into one or two outlier channels. The
@@ -511,19 +1349,33 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap" id="cb-cap"><b>2-bit codebook</b> · levels on the bell</span><canvas id="cb-cv"></canvas></div>
+          <div class="stage"><span class="cap" id="cb-cap"><b>2-bit codebook</b> · levels on the bell</span><canvas
+              id="cb-cv"></canvas></div>
         </div>
         <div>
           <h2>Quantization codebook for that bell shape.</h2>
-          <div class="lead">Because every coordinate now follows the same known bell, quantize the levels where the bell is dense. It is data-free, one tiny table reused for every key, with no calibration.</div>
-          <div class="ctl" id="cb-bits" style="margin-bottom:0.2vh"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button class="btn ghost" data-bits="1">1 bit</button><button class="btn on" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button></div>
+          <div class="lead">Because every coordinate now follows the same known bell, quantize the levels where the bell
+            is dense. It is data-free, one tiny table reused for every key, with no calibration.</div>
+          <div class="ctl" id="cb-bits" style="margin-bottom:0.2vh"><span
+              style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button
+              class="btn ghost" data-bits="1">1 bit</button><button class="btn on" data-bits="2">2 bit</button><button
+              class="btn ghost" data-bits="3">3 bit</button></div>
           <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile"><div class="tl">levels</div><div class="tv" id="cb-L">4</div></div>
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">gap to optimal</div><div class="tv" id="cb-sh" style="color:var(--green);font-size:clamp(16px,1.7vw,24px)">≈2.7x</div></div>
+            <div class="tile">
+              <div class="tl">levels</div>
+              <div class="tv" id="cb-L">4</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">gap to optimal</div>
+              <div class="tv" id="cb-sh" style="color:var(--green);font-size:clamp(16px,1.7vw,24px)">≈2.7x</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="notes">Move two, the real contribution. Because the post-rotation marginal is one known density, Lloyd-Max solves once for the optimal levels: dense in the middle, sparse in the tails. One tiny table, no calibration, no per-block headers. Drag bits to watch the levels re-pack. Hardcoded Lloyd-Max centroids for the unit Gaussian.</div>
+      <div class="notes">Move two, the real contribution. Because the post-rotation marginal is one known density,
+        Lloyd-Max solves once for the optimal levels: dense in the middle, sparse in the tails. One tiny table, no
+        calibration, no per-block headers. Drag bits to watch the levels re-pack. Hardcoded Lloyd-Max centroids for the
+        unit Gaussian.</div>
     </section>
 
     <section class="slide" id="s-bias" data-act="storage" data-accent="amber">
@@ -531,20 +1383,36 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>RECONSTRUCTION</b> ỹ vs y · the tails get capped</span><canvas id="bias-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>RECONSTRUCTION</b> ỹ vs y · the tails get capped</span><canvas
+              id="bias-cv"></canvas></div>
         </div>
         <div>
           <h2>But it lies about inner products.</h2>
-          <div class="lead">Rounding sends each coordinate to its bin's average, which sits closer to zero, so the key comes back shrunk. That is fine for reconstruction, but an inner product with a shrunk key comes out too small, the same way every time, and averaging cannot fix a bias.</div>
-          <div class="ctl" id="bias-bits" style="margin-bottom:0.2vh"><span style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button class="btn on" data-bits="1">1 bit</button><button class="btn ghost" data-bits="2">2 bit</button><button class="btn ghost" data-bits="3">3 bit</button></div>
+          <div class="lead">Rounding sends each coordinate to its bin's average, which sits closer to zero, so the key
+            comes back shrunk. That is fine for reconstruction, but an inner product with a shrunk key comes out too
+            small, the same way every time, and averaging cannot fix a bias.</div>
+          <div class="ctl" id="bias-bits" style="margin-bottom:0.2vh"><span
+              style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1vw,13px);letter-spacing:0.08em;text-transform:uppercase;color:var(--dim)">budget</span><button
+              class="btn on" data-bits="1">1 bit</button><button class="btn ghost" data-bits="2">2 bit</button><button
+              class="btn ghost" data-bits="3">3 bit</button></div>
           <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile" style="border-left-color:var(--red)"><div class="tl">inner product kept</div><div class="tv" id="bias-lam" style="color:var(--red)">0.64</div></div>
-            <div class="tile"><div class="tl">should be</div><div class="tv">1.00</div></div>
+            <div class="tile" style="border-left-color:var(--red)">
+              <div class="tl">inner product kept</div>
+              <div class="tv" id="bias-lam" style="color:var(--red)">0.64</div>
+            </div>
+            <div class="tile">
+              <div class="tl">should be</div>
+              <div class="tv">1.00</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="footer-note">At one bit the score keeps only 2/π, about 0.64 of its value, on every key. So reconstruction solved one problem, and the inner product is a different one.</div>
-      <div class="notes">The bias, the heart of the paper. The MSE-optimal decode is the bin mean, which sits closer to 0 than the inputs, so the reconstruction is a shrunken copy. The staircase shows ỹ(y) sitting inside the identity line: shrinkage. The inner-product multiplier is λ_b = E[ỹ²]/σ² (0.64 / 0.88 / 0.97 for b=1,2,3). Same factor every trial, so averaging does not help.</div>
+      <div class="footer-note">At one bit the score keeps only 2/π, about 0.64 of its value, on every key. So
+        reconstruction solved one problem, and the inner product is a different one.</div>
+      <div class="notes">The bias, the heart of the paper. The MSE-optimal decode is the bin mean, which sits closer to
+        0 than the inputs, so the reconstruction is a shrunken copy. The staircase shows ỹ(y) sitting inside the
+        identity line: shrinkage. The inner-product multiplier is λ_b = E[ỹ²]/σ² (0.64 / 0.88 / 0.97 for b=1,2,3). Same
+        factor every trial, so averaging does not help.</div>
     </section>
 
     <section class="slide" id="s-qjl" data-act="storage" data-accent="amber">
@@ -552,20 +1420,33 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>INNER-PRODUCT ESTIMATE</b> · truth = 1.00</span><canvas id="qjl-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>INNER-PRODUCT ESTIMATE</b> · truth = 1.00</span><canvas
+              id="qjl-cv"></canvas></div>
         </div>
         <div>
           <h2>One bit makes it honest.</h2>
-          <div class="lead">The leftover gap is the residual. Keep only its sign, which is one bit, and since we know the average size of such a gap in advance, the sign says which way to nudge and the size says how far. Add it back and the bias cancels. Any single estimate is noisier, but the average is exactly right.</div>
-          <div class="ctl"><button class="btn" id="qjl-run">fire 1500 trials</button><button class="btn ghost" id="qjl-reset">reset</button></div>
+          <div class="lead">The leftover gap is the residual. Keep only its sign, which is one bit, and since we know
+            the average size of such a gap in advance, the sign says which way to nudge and the size says how far. Add
+            it back and the bias cancels. Any single estimate is noisier, but the average is exactly right.</div>
+          <div class="ctl"><button class="btn" id="qjl-run">fire 1500 trials</button><button class="btn ghost"
+              id="qjl-reset">reset</button></div>
           <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile" style="border-left-color:var(--red)"><div class="tl">round only · mean</div><div class="tv" id="qjl-mse" style="color:var(--red)">0.64</div></div>
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">+ residual bit · mean</div><div class="tv" id="qjl-qjl" style="color:var(--green)">1.00</div></div>
+            <div class="tile" style="border-left-color:var(--red)">
+              <div class="tl">round only · mean</div>
+              <div class="tv" id="qjl-mse" style="color:var(--red)">0.64</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">+ residual bit · mean</div>
+              <div class="tv" id="qjl-qjl" style="color:var(--green)">1.00</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="footer-note">Same one bit, the difference is where it is spent. The biased mean parks at 0.64; the corrected one reaches the truth.</div>
-      <div class="notes">QJL, the un-biaser. Fire trials: the round-only estimate clusters tightly but its mean sits at 0.64 (biased, never moves). The +residual-bit estimate scatters wider but its running mean converges to 1.00 (unbiased, higher variance). Bias vs variance, made visible. This is TurboQuant-prod.</div>
+      <div class="footer-note">Same one bit, the difference is where it is spent. The biased mean parks at 0.64; the
+        corrected one reaches the truth.</div>
+      <div class="notes">QJL, the un-biaser. Fire trials: the round-only estimate clusters tightly but its mean sits at
+        0.64 (biased, never moves). The +residual-bit estimate scatters wider but its running mean converges to 1.00
+        (unbiased, higher variance). Bias vs variance, made visible. This is TurboQuant-prod.</div>
     </section>
 
     <section class="slide" id="s-recipe" data-act="storage" data-accent="amber">
@@ -573,11 +1454,26 @@
       <div class="rule"></div>
       <h2 class="wide" style="margin-bottom:2.6vh">The whole thing, in three steps.</h2>
       <div class="row" style="gap:1.4vw;align-items:stretch;max-width:82vw">
-        <div class="card" style="flex:1 1 0;border-top:2px solid var(--amber)"><div class="cl">step 1 · rotate</div><div class="cw" style="font-size:clamp(22px,2.6vw,38px)">Πx</div><div class="cb" style="margin-top:1vh">Every coordinate takes the same known shape.</div></div>
-        <div class="card" style="flex:1 1 0;border-top:2px solid var(--amber)"><div class="cl">step 2 · round</div><div class="cw" style="font-size:clamp(22px,2.6vw,38px)">B−1 bits</div><div class="cb" style="margin-top:1vh">Snap each coordinate to the one codebook built for that shape.</div></div>
-        <div class="card" style="flex:1 1 0;border-top:2px solid var(--green)"><div class="cl">step 3 · correct</div><div class="cw" style="font-size:clamp(22px,2.6vw,38px);color:var(--green)">+1 bit</div><div class="cb" style="margin-top:1vh">Spend the last bit on the residual's sign, so the inner product is unbiased.</div></div>
+        <div class="card" style="flex:1 1 0;border-top:2px solid var(--amber)">
+          <div class="cl">step 1 · rotate</div>
+          <div class="cw" style="font-size:clamp(22px,2.6vw,38px)">Πx</div>
+          <div class="cb" style="margin-top:1vh">Every coordinate takes the same known shape.</div>
+        </div>
+        <div class="card" style="flex:1 1 0;border-top:2px solid var(--amber)">
+          <div class="cl">step 2 · round</div>
+          <div class="cw" style="font-size:clamp(22px,2.6vw,38px)">B−1 bits</div>
+          <div class="cb" style="margin-top:1vh">Snap each coordinate to the one codebook built for that shape.</div>
+        </div>
+        <div class="card" style="flex:1 1 0;border-top:2px solid var(--green)">
+          <div class="cl">step 3 · correct</div>
+          <div class="cw" style="font-size:clamp(22px,2.6vw,38px);color:var(--green)">+1 bit</div>
+          <div class="cb" style="margin-top:1vh">Spend the last bit on the residual's sign, so the inner product is
+            unbiased.</div>
+        </div>
       </div>
-      <div class="notes">The recap, breathing on its own slide. Three steps: rotate (free, prior art), round with the universal codebook (b-1 bits), correct with one sign bit (QJL). One scalar per vector, the residual norm, versus a header per block elsewhere. Say "rotate, round, correct" and move to the receipt.</div>
+      <div class="notes">The recap, breathing on its own slide. Three steps: rotate (free, prior art), round with the
+        universal codebook (b-1 bits), correct with one sign bit (QJL). One scalar per vector, the residual norm, versus
+        a header per block elsewhere. Say "rotate, round, correct" and move to the receipt.</div>
     </section>
 
     <section class="slide" id="s-shannon" data-act="storage" data-accent="amber">
@@ -585,19 +1481,31 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>DISTORTION</b> vs bits · log scale</span><canvas id="shan-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>DISTORTION</b> vs bits · log scale</span><canvas
+              id="shan-cv"></canvas></div>
         </div>
         <div>
           <h2>How close to the best possible?</h2>
-          <div class="lead">Information theory sets a floor no quantizer can beat: error cannot fall below 4 to the minus b. TurboQuant lands about 2.7x above it, 1.5x at one bit. And its error falls like 4 to the minus b, exponential in bits, where older sketches only improved like 1/b.</div>
+          <div class="lead">Information theory sets a floor no quantizer can beat: error cannot fall below 4 to the
+            minus b. TurboQuant lands about 2.7x above it, 1.5x at one bit. And its error falls like 4 to the minus b,
+            exponential in bits, where older sketches only improved like 1/b.</div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">gap to optimal</div><div class="tv" id="shan-gap" style="color:var(--green);font-size:clamp(16px,1.7vw,24px)">≈2.7x</div></div>
-            <div class="tile"><div class="tl">rate</div><div class="tv">4⁻ᵇ</div></div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">gap to optimal</div>
+              <div class="tv" id="shan-gap" style="color:var(--green);font-size:clamp(16px,1.7vw,24px)">≈2.7x</div>
+            </div>
+            <div class="tile">
+              <div class="tl">rate</div>
+              <div class="tv">4⁻ᵇ</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="footer-note">Exponential in the bits, and proven for every bit-width. That near-optimality is what TurboQuant genuinely adds, and it is why a handful of bits is enough.</div>
-      <div class="notes">Near-optimality. Shannon floor 4^-b (gold), TurboQuant (sqrt(3)π/2)·4^-b ≈ 2.7x above and parallel (amber), old data-free sketch ~1/b which starts close but falls behind fast (red). Log y-axis, so a constant gap is a constant vertical offset. Same exponential slope as the floor is the point.</div>
+      <div class="footer-note">Exponential in the bits, and proven for every bit-width. That near-optimality is what
+        TurboQuant genuinely adds, and it is why a handful of bits is enough.</div>
+      <div class="notes">Near-optimality. Shannon floor 4^-b (gold), TurboQuant (sqrt(3)π/2)·4^-b ≈ 2.7x above and
+        parallel (amber), old data-free sketch ~1/b which starts close but falls behind fast (red). Log y-axis, so a
+        constant gap is a constant vertical offset. Same exponential slope as the floor is the point.</div>
     </section>
 
     <!-- <section class="slide" id="s-tqresults" data-act="storage" data-accent="amber">
@@ -636,18 +1544,25 @@
         <div>
           <h2>Can we train with less data?</h2>
           <div class="lead">The second cost is data. A scaling law says you need a mountain of it, which looks like
-            the price of quality. But what if we impose geometric constraints in the loss function which conditions the training to be more well-behaved and makes the best of the available data?</div>
+            the price of quality. But what if we impose geometric constraints in the loss function which conditions the
+            training to be more well-behaved and makes the best of the available data?</div>
         </div>
         <div class="stagewrap">
           <div class="stage">
             <span class="cap"><b>LOSS</b> vs DATA · log scale</span>
-            
+
             <canvas id="scale-cv"></canvas>
           </div>
         </div>
       </div>
-      <div class="ctl"><label>data budget <input id="scale-d" type="range" min="6" max="100" value="78"><span class="val" id="scale-dv">1.0x</span></label>
-        <div class="tiles" style="flex:0 0 auto"><div class="tile" style="min-width:200px"><div class="tl">data for same loss, +STP</div><div class="tv" id="scale-save" style="color:var(--blue)">1/16</div></div></div>
+      <div class="ctl"><label>data budget <input id="scale-d" type="range" min="6" max="100" value="78"><span
+            class="val" id="scale-dv">1.0x</span></label>
+        <div class="tiles" style="flex:0 0 auto">
+          <div class="tile" style="min-width:200px">
+            <div class="tl">data for same loss, +STP</div>
+            <div class="tv" id="scale-save" style="color:var(--blue)">1/16</div>
+          </div>
+        </div>
       </div>
       <div class="notes">Set the stakes. The power law is not destiny, it describes one objective. STP shifts the
         curve left. Slide the budget: the blue curve reaches the same loss far earlier.</div>
@@ -658,14 +1573,28 @@
       <div class="rule"></div>
       <h2 class="wide">Next-token prediction cannot tell signal from noise.</h2>
       <div style="margin-top:1vh">
-        <div class="seq" style="margin-bottom:1.4vh"><span class="tok" style="border:none;background:none;color:var(--mute);width:9ch">same meaning</span>
-          <span class="tok">the</span><span class="tok">capital</span><span class="tok">of</span><span class="tok">france</span><span class="tok">is</span><span class="tok out">paris</span></div>
-        <div class="seq"><span class="tok" style="border:none;background:none;color:var(--mute);width:9ch">same meaning</span>
-          <span class="tok">france</span><span class="tok">'s</span><span class="tok">capital</span><span class="tok">city</span><span class="tok">is</span><span class="tok out">paris</span></div>
+        <div class="seq" style="margin-bottom:1.4vh"><span class="tok"
+            style="border:none;background:none;color:var(--mute);width:9ch">same meaning</span>
+          <span class="tok">the</span><span class="tok">capital</span><span class="tok">of</span><span
+            class="tok">france</span><span class="tok">is</span><span class="tok out">paris</span>
+        </div>
+        <div class="seq"><span class="tok" style="border:none;background:none;color:var(--mute);width:9ch">same
+            meaning</span>
+          <span class="tok">france</span><span class="tok">'s</span><span class="tok">capital</span><span
+            class="tok">city</span><span class="tok">is</span><span class="tok out">paris</span>
+        </div>
       </div>
       <div class="cols2" style="margin-top:3vh;max-width:64vw">
-        <div class="card" style="border-top:2px solid var(--blue)"><div class="cl">the snr problem</div><div class="cb" style="margin-top:0">Surface form carries no meaning, yet every word gets the same loss weight as the answer. The signal sits under a pile of noise.</div></div>
-        <div class="card" style="border-top:2px solid var(--blue)"><div class="cl">exposure bias</div><div class="cb" style="margin-top:0">Training reads the true prefix. Generation reads its own output. The two drift apart, and the drift compounds.</div></div>
+        <div class="card" style="border-top:2px solid var(--blue)">
+          <div class="cl">the snr problem</div>
+          <div class="cb" style="margin-top:0">Surface form carries no meaning, yet every word gets the same loss weight
+            as the answer. The signal sits under a pile of noise.</div>
+        </div>
+        <div class="card" style="border-top:2px solid var(--blue)">
+          <div class="cl">exposure bias</div>
+          <div class="cb" style="margin-top:0">Training reads the true prefix. Generation reads its own output. The two
+            drift apart, and the drift compounds.</div>
+        </div>
       </div>
       <div class="notes">Two sentences, one meaning. NTP treats every surface token as a separate target, so it spends
         capacity memorizing word order. Plus exposure bias. Both point to the same cure: constrain the trajectory,
@@ -677,11 +1606,14 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>HIDDEN STATE</b> · one point per token</span><canvas id="path-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>HIDDEN STATE</b> · one point per token</span><canvas
+              id="path-cv"></canvas></div>
         </div>
         <div>
           <h2>A sentence is a path.</h2>
-          <div class="lead">Read a token and the hidden state steps to a new point; read the next and it steps again. String those points together and the sentence becomes a path through space, like a walk through a city.</div>
+          <div class="lead">Read a token and the hidden state steps to a new point; read the next and it steps again.
+            String those points together and the sentence becomes a path through space, like a walk through a city.
+          </div>
           <div class="ctl"><button class="btn" id="path-go">read the sentence</button></div>
         </div>
       </div>
@@ -695,17 +1627,28 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>TWO STEPS</b> · the angle between them</span><canvas id="step-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>TWO STEPS</b> · the angle between them</span><canvas
+              id="step-cv"></canvas></div>
         </div>
         <div>
           <h2>Two steps, one angle.</h2>
-          <div class="lead">Walk the path two steps at a time, this step and then the next. If you are walking a straight line, the two point the same way, so the angle between them tells the whole story: it is zero on a straight stretch, and it opens up as the path bends.</div>
-          <div class="ctl"><label>bend the path <input id="step-bend" type="range" min="0" max="100" value="52"><span class="val" id="step-bendv">52%</span></label></div>
+          <div class="lead">Walk the path two steps at a time, this step and then the next. If you are walking a
+            straight line, the two point the same way, so the angle between them tells the whole story: it is zero on a
+            straight stretch, and it opens up as the path bends.</div>
+          <div class="ctl"><label>bend the path <input id="step-bend" type="range" min="0" max="100" value="52"><span
+                class="val" id="step-bendv">52%</span></label></div>
           <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile"><div class="tl">angle</div><div class="tv" id="step-ang">0°</div></div>
-            <div class="tile"><div class="tl">1 − cos of the angle</div><div class="tv" id="step-loss">0.00</div></div>
+            <div class="tile">
+              <div class="tl">angle</div>
+              <div class="tv" id="step-ang">0°</div>
+            </div>
+            <div class="tile">
+              <div class="tl">1 − cos of the angle</div>
+              <div class="tv" id="step-loss">0.00</div>
+            </div>
           </div>
-          <div class="footer-note" style="margin-top:1.4vh">STP measures this between chords from randomly chosen earlier points, so the whole run stays straight, not just neighbors. That is the loss.</div>
+          <div class="footer-note" style="margin-top:1.4vh">STP measures this between chords from randomly chosen
+            earlier points, so the whole run stays straight, not just neighbors. That is the loss.</div>
         </div>
       </div>
       <div class="notes">The primitive the loss is built on. Two consecutive steps, the angle between them is the bend,
@@ -718,20 +1661,32 @@
       <div class="rule"></div>
       <div class="cols2 demo-left">
         <div class="stagewrap">
-          <div class="stage"><span class="cap"><b>ONE STEP</b> · along vs across</span><canvas id="decomp-cv"></canvas></div>
+          <div class="stage"><span class="cap"><b>ONE STEP</b> · along vs across</span><canvas id="decomp-cv"></canvas>
+          </div>
         </div>
         <div>
           <h2>Signal goes along, noise goes across.</h2>
-          <div class="lead">Split one step against the direction of travel. The part that points <span style="color:var(--green)">along</span> it is real progress, the signal. The part that points <span style="color:var(--red)">across</span> it is wobble that goes nowhere, the noise.</div>
-          <div class="ctl"><label>tilt the step <input id="decomp-a" type="range" min="0" max="100" value="34"><span class="val" id="decomp-av">0°</span></label></div>
+          <div class="lead">Split one step against the direction of travel. The part that points <span
+              style="color:var(--green)">along</span> it is real progress, the signal. The part that points <span
+              style="color:var(--red)">across</span> it is wobble that goes nowhere, the noise.</div>
+          <div class="ctl"><label>tilt the step <input id="decomp-a" type="range" min="0" max="100" value="34"><span
+                class="val" id="decomp-av">0°</span></label></div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">signal · along</div><div class="tv" id="decomp-sig" style="color:var(--green)">0.00</div></div>
-            <div class="tile" style="border-left-color:var(--red)"><div class="tl">noise · across</div><div class="tv" id="decomp-noise" style="color:var(--red)">0.00</div></div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">signal · along</div>
+              <div class="tv" id="decomp-sig" style="color:var(--green)">0.00</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--red)">
+              <div class="tl">noise · across</div>
+              <div class="tv" id="decomp-noise" style="color:var(--red)">0.00</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="footer-note">A straight path is all along and nothing across. That is why it is the low-noise one. Every bit of across is data the model has to fit and then average away.</div>
-      <div class="notes">The definition of signal and noise, made geometric, lifted from the explainer's primer. One step
+      <div class="footer-note">A straight path is all along and nothing across. That is why it is the low-noise one.
+        Every bit of across is data the model has to fit and then average away.</div>
+      <div class="notes">The definition of signal and noise, made geometric, lifted from the explainer's primer. One
+        step
         splits against the direction of travel: the along part is progress (green, signal), the across part is wobble
         (red, noise). Tilt the step and the across part grows. A straight path has zero across, so it is the only
         low-noise one. This is exactly the split the tube enforces on the next slide.</div>
@@ -745,19 +1700,31 @@
           <h2 style="margin-bottom:1vh">The clean path is a straight line.</h2>
           <div class="lead" style="font-size:clamp(14px,1.4vw,19px);margin-bottom:1.4vh">This is the geodesic
             hypothesis: the clean path is straight. Each step splits into <span style="color:var(--green)">signal
-            along it</span> and <span style="color:var(--red)">noise across it</span>.</div>
+              along it</span> and <span style="color:var(--red)">noise across it</span>.</div>
           <div class="stage" style="flex:1 1 auto;min-height:0">
             <span class="cap"><b>SEMANTIC TUBE</b> · drag h_r</span>
-            
+
             <canvas id="tube3d-cv"></canvas>
           </div>
         </div>
         <div style="flex:0 0 27vw;display:flex;flex-direction:column;gap:1.4vh">
-          <div class="stage" style="height:30vh"><span class="cap"><b>L_STP</b> meter</span><canvas id="tube-gauge"></canvas></div>
-          <div id="tube-status" class="card" style="margin:0;padding:1.4vh 1vw;font-size:14px;border-top:2px solid var(--green)">In the tube. Pure signal, loss near zero.</div>
-          <div class="tiles"><div class="tile" style="border-left-color:var(--green)"><div class="tl">signal</div><div class="tv" id="tube-sig" style="color:var(--green)">0.00</div></div>
-            <div class="tile" style="border-left-color:var(--red)"><div class="tl">noise</div><div class="tv" id="tube-noise" style="color:var(--red)">0.00</div></div></div>
-          <div class="ctl" style="margin:0"><button class="btn" id="tube-train">auto-train</button><label>tube ε<input id="tube-eps" type="range" min="0.12" max="0.55" step="0.01" value="0.30"></label></div>
+          <div class="stage" style="height:30vh"><span class="cap"><b>L_STP</b> meter</span><canvas
+              id="tube-gauge"></canvas></div>
+          <div id="tube-status" class="card"
+            style="margin:0;padding:1.4vh 1vw;font-size:14px;border-top:2px solid var(--green)">In the tube. Pure
+            signal, loss near zero.</div>
+          <div class="tiles">
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">signal</div>
+              <div class="tv" id="tube-sig" style="color:var(--green)">0.00</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--red)">
+              <div class="tl">noise</div>
+              <div class="tv" id="tube-noise" style="color:var(--red)">0.00</div>
+            </div>
+          </div>
+          <div class="ctl" style="margin:0"><button class="btn" id="tube-train">auto-train</button><label>tube ε<input
+                id="tube-eps" type="range" min="0.12" max="0.55" step="0.01" value="0.30"></label></div>
         </div>
       </div>
       <div class="notes">The core intuition. The loss is one cosine: how much consecutive steps bend. Drag h_r off the
@@ -769,14 +1736,26 @@
       <div class="kicker">part 02 · learning</div>
       <div class="rule"></div>
       <h2 class="wide" style="margin-bottom:1.2vh">It is one extra term in the loss.</h2>
-      <div class="footer-note" style="margin:0 0 2vh">STP comes from JEPA, Yann LeCun's idea of predicting in representation space instead of in tokens. The tube is that idea for language, and it needs none of JEPA's usual machinery.</div>
+      <div class="footer-note" style="margin:0 0 2vh">STP comes from JEPA, Yann LeCun's idea of predicting in
+        representation space instead of in tokens. The tube is that idea for language, and it needs none of JEPA's usual
+        machinery.</div>
       <div class="card" style="margin:0 0 2.2vh;padding:1.8vh 1.4vw;max-width:62vw">
         <div class="cl">the whole objective</div>
-        <div class="mono" style="font-size:clamp(16px,1.9vw,26px);color:var(--text);margin-top:0.8vh">L = L<sub>NTP</sub> &nbsp;+&nbsp; λ · L<sub>STP</sub><span style="color:var(--mute);font-size:0.66em">&nbsp;&nbsp;( 1 − cos of the bend )</span></div>
+        <div class="mono" style="font-size:clamp(16px,1.9vw,26px);color:var(--text);margin-top:0.8vh">L =
+          L<sub>NTP</sub> &nbsp;+&nbsp; λ · L<sub>STP</sub><span
+            style="color:var(--mute);font-size:0.66em">&nbsp;&nbsp;( 1 − cos of the bend )</span></div>
       </div>
       <div class="cols2" style="max-width:74vw">
-        <div class="card" style="border-top:2px solid var(--mute)"><div class="cl">what jepa usually needs</div><div class="cb" style="margin-top:0.4vh">Two augmented views of the input, a separate predictor network, and an extra forward pass.</div></div>
-        <div class="card" style="border-top:2px solid var(--blue)"><div class="cl">what the tube needs</div><div class="cb" style="margin-top:0.4vh">One cosine on the model's own trajectory. No second view, no predictor. And λ is zero at inference, so it costs nothing to run.</div></div>
+        <div class="card" style="border-top:2px solid var(--mute)">
+          <div class="cl">what jepa usually needs</div>
+          <div class="cb" style="margin-top:0.4vh">Two augmented views of the input, a separate predictor network, and
+            an extra forward pass.</div>
+        </div>
+        <div class="card" style="border-top:2px solid var(--blue)">
+          <div class="cl">what the tube needs</div>
+          <div class="cb" style="margin-top:0.4vh">One cosine on the model's own trajectory. No second view, no
+            predictor. And λ is zero at inference, so it costs nothing to run.</div>
+        </div>
       </div>
       <div class="notes">The method, and the JEPA framing the paper is named for. STP is a JEPA-style regularizer for
         language: predict in representation space, but using the sequence's own trajectory instead of two augmented
@@ -792,7 +1771,7 @@
         <div class="stagewrap tall">
           <div class="stage">
             <span class="cap"><b>INFERENCE CONE</b> · two meanings</span>
-            
+
             <canvas id="cone-cv"></canvas>
           </div>
         </div>
@@ -802,10 +1781,17 @@
             cross. But generation feeds on its own output, so noise compounds, fanning each path into a widening
             cone. Turn STP off, the cones overlap and the two meanings collapse into one. Turn it on, the wobble
             shrinks and they stay distinct.</div>
-          <div class="ctl"><button class="btn on" id="cone-stp">STP: on, distinct</button><label>noise σ<input id="cone-sig" type="range" min="0.1" max="0.9" step="0.01" value="0.7"></label></div>
+          <div class="ctl"><button class="btn on" id="cone-stp">STP: on, distinct</button><label>noise σ<input
+                id="cone-sig" type="range" min="0.1" max="0.9" step="0.01" value="0.7"></label></div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile"><div class="tl">crossing over</div><div class="tv" id="cone-p">0%</div></div>
-            <div class="tile" style="border-left-color:var(--green)"><div class="tl">distinct meanings</div><div class="tv" id="cone-sep" style="color:var(--green)">2 / 2</div></div>
+            <div class="tile">
+              <div class="tl">crossing over</div>
+              <div class="tv" id="cone-p">0%</div>
+            </div>
+            <div class="tile" style="border-left-color:var(--green)">
+              <div class="tl">distinct meanings</div>
+              <div class="tv" id="cone-sep" style="color:var(--green)">2 / 2</div>
+            </div>
           </div>
         </div>
       </div>
@@ -819,15 +1805,31 @@
       <h2 style="margin-bottom:0.6vh">One knob moves the whole chain.</h2>
       <div class="footer-note" style="margin:0 0 1.6vh">Less wobble means less noise, and with less noise each example
         carries more signal, so you need fewer of them.</div>
-      <div class="stage" style="height:26vh"><span class="cap"><b>TRAJECTORY</b> · wobbly to geodesic</span><canvas id="fuse-path"></canvas></div>
+      <div class="stage" style="height:26vh"><span class="cap"><b>TRAJECTORY</b> · wobbly to geodesic</span><canvas
+          id="fuse-path"></canvas></div>
       <div class="tiles" style="margin-top:1.6vh">
-        <div class="tile" style="border-left-color:var(--blue)"><div class="tl">L_STP minimized</div><div class="tv" id="fuse-loss">0.45</div></div>
-        <div class="tile" style="border-left-color:var(--blue)"><div class="tl">signal / noise</div><div class="tv" id="fuse-snr">0.3</div></div>
-        <div class="tile" style="border-left-color:var(--blue)"><div class="tl">data to match</div><div class="tv" id="fuse-data">15.6x</div></div>
-        <div class="tile" style="border-left-color:var(--green)"><div class="tl">accuracy @ fixed budget</div><div class="tv" id="fuse-acc" style="color:var(--green)">20%</div></div>
+        <div class="tile" style="border-left-color:var(--blue)">
+          <div class="tl">L_STP minimized</div>
+          <div class="tv" id="fuse-loss">0.45</div>
+        </div>
+        <div class="tile" style="border-left-color:var(--blue)">
+          <div class="tl">signal / noise</div>
+          <div class="tv" id="fuse-snr">0.3</div>
+        </div>
+        <div class="tile" style="border-left-color:var(--blue)">
+          <div class="tl">data to match</div>
+          <div class="tv" id="fuse-data">15.6x</div>
+        </div>
+        <div class="tile" style="border-left-color:var(--green)">
+          <div class="tl">accuracy @ fixed budget</div>
+          <div class="tv" id="fuse-acc" style="color:var(--green)">20%</div>
+        </div>
       </div>
-      <div class="ctl"><button class="btn" id="fuse-play">train with STP</button><label>training <input id="fuse-slider" type="range" min="0" max="100" value="0"><span class="val" id="fuse-sliderv">0%</span></label>
-        <span class="footer-note" id="fuse-punch" style="margin:0">Raw training: low SNR, you would need ~16x the data.</span></div>
+      <div class="ctl"><button class="btn" id="fuse-play">train with STP</button><label>training <input id="fuse-slider"
+            type="range" min="0" max="100" value="0"><span class="val" id="fuse-sliderv">0%</span></label>
+        <span class="footer-note" id="fuse-punch" style="margin:0">Raw training: low SNR, you would need ~16x the
+          data.</span>
+      </div>
       <div class="notes">The money slide. Drag training to the right: path straightens, loss falls, SNR climbs, data
         needed drops to one sixteenth, accuracy rises to the full-data line. The entire thesis in one gesture.
         Illustrative numbers, calibrated to the paper's 16x.</div>
@@ -852,14 +1854,18 @@
           <div class="lead">The third cost is depth. To recall one static fact the model rebuilds it layer after
             layer, which looks like the price of knowledge. It is depth spent on something that never changes.</div>
           <div class="footer-note">"Diana, Princess of Wales" is a fixed entry. Six layers should not be its price.
-            <br>Illustrative trace; source: PatchScopes, Ghandeharioun et al. 2024.</div>
+            <br>Illustrative trace; source: PatchScopes, Ghandeharioun et al. 2024.
+          </div>
         </div>
         <div id="etable">
           <div class="erow reveal"><span class="el">layer 1</span><span class="ev">Wales</span></div>
           <div class="erow reveal"><span class="el">layer 3</span><span class="ev">A country in europe</span></div>
-          <div class="erow reveal"><span class="el">layer 4</span><span class="ev">Princess of Wales (unspecific)</span></div>
-          <div class="erow reveal"><span class="el">layer 5</span><span class="ev">Title for the wife of the Prince of Wales</span></div>
-          <div class="erow reveal final"><span class="el">layer 6</span><span class="ev">Diana, Princess of Wales</span></div>
+          <div class="erow reveal"><span class="el">layer 4</span><span class="ev">Princess of Wales (unspecific)</span>
+          </div>
+          <div class="erow reveal"><span class="el">layer 5</span><span class="ev">Title for the wife of the Prince of
+              Wales</span></div>
+          <div class="erow reveal final"><span class="el">layer 6</span><span class="ev">Diana, Princess of Wales</span>
+          </div>
         </div>
       </div>
       <div class="notes">The waste, shown directly. PatchScopes reads each layer: the model assembles a known entity
@@ -874,11 +1880,13 @@
       <div class="cols2" style="max-width:74vw">
         <div class="card" style="border-top:2px solid var(--mute)">
           <div class="cl">conditional compute · moe</div>
-          <div class="cb" style="margin-top:0.6vh">For each token, route to a few experts out of many, so the model picks which weights to run. This part is already standard.</div>
+          <div class="cb" style="margin-top:0.6vh">For each token, route to a few experts out of many, so the model
+            picks which weights to run. This part is already standard.</div>
         </div>
         <div class="card" style="border-top:2px solid var(--purple)">
           <div class="cl">conditional memory · engram</div>
-          <div class="cb" style="margin-top:0.6vh">For each token, fetch a few rows from a huge table, so the model picks which memories to recall, with no matrix multiply, just a read.</div>
+          <div class="cb" style="margin-top:0.6vh">For each token, fetch a few rows from a huge table, so the model
+            picks which memories to recall, with no matrix multiply, just a read.</div>
         </div>
       </div>
       <div class="footer-note">A fact you can look up should not cost a full expert. Engram puts the second kind of
@@ -895,21 +1903,39 @@
         <div class="row" style="gap:2vw;align-items:stretch">
           <div class="stack grow">
             <div class="blk tiny">Standard MoE</div>
-            <div class="blk">Tokens</div><div class="blk">Attention</div><div class="blk">MoE FFN</div>
-            <div class="blk">Attention</div><div class="blk">MoE FFN</div>
+            <div class="blk">Tokens</div>
+            <div class="blk">Attention</div>
+            <div class="blk">MoE FFN</div>
+            <div class="blk">Attention</div>
+            <div class="blk">MoE FFN</div>
             <div class="blk tiny" style="color:var(--red)">Early depth rebuilds entities</div>
           </div>
           <div class="stack grow">
             <div class="blk tiny">Engram</div>
-            <div class="blk">Tokens</div><div class="blk hot">Engram memory</div><div class="blk">Attention</div>
-            <div class="blk">MoE FFN</div><div class="blk">Attention</div>
+            <div class="blk">Tokens</div>
+            <div class="blk hot">Engram memory</div>
+            <div class="blk">Attention</div>
+            <div class="blk">MoE FFN</div>
+            <div class="blk">Attention</div>
             <div class="blk tiny" style="color:var(--green)">Lookup first, depth freed to reason</div>
           </div>
         </div>
         <div class="stack" style="gap:1.2vh">
-          <div class="card" style="border-top:2px solid var(--purple)"><div class="cl">1 · retrieve</div><div class="cb" style="margin-top:0">Hash the last 2-gram and 3-gram into a giant embedding table. O(1) lookup, no compute.</div></div>
-          <div class="card" style="border-top:2px solid var(--purple)"><div class="cl">2 · gate</div><div class="cb" style="margin-top:0">A context-aware gate suppresses retrievals that do not fit, so noise never enters the stream.</div></div>
-          <div class="card" style="border-top:2px solid var(--purple)"><div class="cl">3 · inject</div><div class="cb" style="margin-top:0">Add it to the running representation at layer 2, before reconstruction would have begun.</div></div>
+          <div class="card" style="border-top:2px solid var(--purple)">
+            <div class="cl">1 · retrieve</div>
+            <div class="cb" style="margin-top:0">Hash the last 2-gram and 3-gram into a giant embedding table. O(1)
+              lookup, no compute.</div>
+          </div>
+          <div class="card" style="border-top:2px solid var(--purple)">
+            <div class="cl">2 · gate</div>
+            <div class="cb" style="margin-top:0">A context-aware gate suppresses retrievals that do not fit, so noise
+              never enters the stream.</div>
+          </div>
+          <div class="card" style="border-top:2px solid var(--purple)">
+            <div class="cl">3 · inject</div>
+            <div class="cb" style="margin-top:0">Add it to the running representation at layer 2, before reconstruction
+              would have begun.</div>
+          </div>
         </div>
       </div>
       <div class="footer-note">Tables run 5.7B to 18.5B params, offloaded to host DRAM. Deterministic lookup means
@@ -926,17 +1952,26 @@
         <div class="stagewrap">
           <div class="stage">
             <span class="cap"><b>VAL LOSS</b> vs compute split</span>
-            
+
             <canvas id="ucurve-cv"></canvas>
           </div>
         </div>
         <div>
           <h2>The sparsity sweet spot.</h2>
-          <div class="lead">Split the budget between Engram lookup and MoE experts. Lean too far toward MoE and you waste early layers on facts; lean too far toward Engram and you starve the reasoning. In between, the loss traces a U.</div>
-          <div class="ctl"><label>moe share <input id="uc-rho" type="range" min="0" max="100" value="30"><span class="val" id="uc-rhov">30%</span></label></div>
+          <div class="lead">Split the budget between Engram lookup and MoE experts. Lean too far toward MoE and you
+            waste early layers on facts; lean too far toward Engram and you starve the reasoning. In between, the loss
+            traces a U.</div>
+          <div class="ctl"><label>moe share <input id="uc-rho" type="range" min="0" max="100" value="30"><span
+                class="val" id="uc-rhov">30%</span></label></div>
           <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile"><div class="tl">val loss</div><div class="tv" id="uc-loss">0.00</div></div>
-            <div class="tile"><div class="tl">regime</div><div class="tv" id="uc-reg" style="font-size:clamp(14px,1.5vw,20px)">too little moe</div></div>
+            <div class="tile">
+              <div class="tl">val loss</div>
+              <div class="tv" id="uc-loss">0.00</div>
+            </div>
+            <div class="tile">
+              <div class="tl">regime</div>
+              <div class="tv" id="uc-reg" style="font-size:clamp(14px,1.5vw,20px)">too little moe</div>
+            </div>
           </div>
         </div>
       </div>
@@ -962,11 +1997,16 @@
           <div class="lead">Freed from rebuilding entities, Engram reaches deep representations earlier. Its layer 5
             already matches a plain MoE layer 12.</div>
           <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile"><div class="tl">engram L5 matches moe</div><div class="tv">L12</div></div>
+            <div class="tile">
+              <div class="tl">engram L5 matches moe</div>
+              <div class="tv">L12</div>
+            </div>
           </div>
-          <div class="footer-note" style="margin-top:1.8vh">The gate fires on multi-token entities and set phrases, even though it was never trained to. That behavior just emerges.</div>
+          <div class="footer-note" style="margin-top:1.8vh">The gate fires on multi-token entities and set phrases, even
+            though it was never trained to. That behavior just emerges.</div>
           <div class="seq" style="margin-top:1vh">
-            <span class="tok">only</span><span class="tok warm">alexander</span><span class="tok">the</span><span class="tok warm">great</span><span class="tok">tamed</span><span class="tok warm">bucephalus</span>
+            <span class="tok">only</span><span class="tok warm">alexander</span><span class="tok">the</span><span
+              class="tok warm">great</span><span class="tok">tamed</span><span class="tok warm">bucephalus</span>
           </div>
         </div>
       </div>
@@ -979,14 +2019,20 @@
       <div class="kicker">part 03 · compute</div>
       <div class="rule"></div>
       <h2 class="wide">The gains land where you would not expect.</h2>
-      <div class="footer-note" style="margin:0.4vh 0 1.4vh">Engram-27B against an iso-param, iso-FLOPs MoE baseline. Built to help knowledge recall, but the bigger jumps are in reasoning and code.</div>
+      <div class="footer-note" style="margin:0.4vh 0 1.4vh">Engram-27B against an iso-param, iso-FLOPs MoE baseline.
+        Built to help knowledge recall, but the bigger jumps are in reasoning and code.</div>
       <div class="bars" id="engram-bars" style="margin-top:0.5vh;max-width:64vw">
-        <div class="barline"><span class="nm">MMLU · knowledge</span><span class="track"><i data-v="54"></i></span><span class="vv">+3.4</span></div>
-        <div class="barline"><span class="nm">HumanEval · code</span><span class="track"><i data-v="48"></i></span><span class="vv">+3.0</span></div>
-        <div class="barline"><span class="nm">ARC · reasoning</span><span class="track"><i data-v="59"></i></span><span class="vv">+3.7</span></div>
-        <div class="barline win"><span class="nm">BBH · reasoning</span><span class="track"><i data-v="80"></i></span><span class="vv">+5.0</span></div>
+        <div class="barline"><span class="nm">MMLU · knowledge</span><span class="track"><i data-v="54"></i></span><span
+            class="vv">+3.4</span></div>
+        <div class="barline"><span class="nm">HumanEval · code</span><span class="track"><i data-v="48"></i></span><span
+            class="vv">+3.0</span></div>
+        <div class="barline"><span class="nm">ARC · reasoning</span><span class="track"><i data-v="59"></i></span><span
+            class="vv">+3.7</span></div>
+        <div class="barline win"><span class="nm">BBH · reasoning</span><span class="track"><i
+              data-v="80"></i></span><span class="vv">+5.0</span></div>
       </div>
-      <div class="footer-note">And by freeing attention for global context, long-context retrieval jumps most of all: multi-query needle 84.2 → 97.0.</div>
+      <div class="footer-note">And by freeing attention for global context, long-context retrieval jumps most of all:
+        multi-query needle 84.2 → 97.0.</div>
       <div class="notes">The receipt, mirroring Act I's s-tqresults. Built for knowledge (MMLU +3.4, CMMLU +4.0) but the
         larger gains are reasoning (BBH +5.0, ARC +3.7) and code/math (HumanEval +3.0, MATH +2.4), because freeing the
         early layers helps reasoning most. Long-context NIAH 84.2 to 97.0. Let the green BBH row land last.</div>
@@ -1007,26 +2053,38 @@
       <div class="kicker" style="color:var(--text)">Wrapping up</div>
       <h2 class="wide" style="margin-bottom:2.4vh">Three directions</h2>
       <div style="display:flex;flex-direction:column;gap:1.2vh;max-width:80vw">
-        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;font-family:'JetBrains Mono',monospace;font-size:clamp(9px,0.9vw,11.5px);letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);padding:0 1vw">
+        <div
+          style="display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;font-family:'JetBrains Mono',monospace;font-size:clamp(9px,0.9vw,11.5px);letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);padding:0 1vw">
           <span>paper</span><span>the cost everyone pays</span><span>the fix</span><span>the win</span>
         </div>
-        <div class="card" style="padding:1.8vh 1vw;border-left:3px solid var(--amber);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
-          <span style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--amber)">DRIVE, EDEN, RaBitQ, TurboQuant</span>
+        <div class="card"
+          style="padding:1.8vh 1vw;border-left:3px solid var(--amber);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+          <span
+            style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--amber)">DRIVE,
+            EDEN, RaBitQ, TurboQuant</span>
           <span class="cb" style="margin:0">Keys stored in more bits than required</span>
           <span class="cb" style="margin:0">Rotate, then quantize, push in the right direction</span>
-          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less space to store</span>
+          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less space to
+            store</span>
         </div>
-        <div class="card" style="padding:1.8vh 1vw;border-left:3px solid var(--blue);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
-          <span style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--blue)">Semantic Tube</span>
+        <div class="card"
+          style="padding:1.8vh 1vw;border-left:3px solid var(--blue);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+          <span
+            style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--blue)">Semantic
+            Tube</span>
           <span class="cb" style="margin:0">Training fits surface noise as signal</span>
           <span class="cb" style="margin:0">Enforce the geodesic</span>
-          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less data to train</span>
+          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less data to
+            train</span>
         </div>
-        <div class="card" style="padding:1.8vh 1vw;border-left:3px solid var(--purple);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
-          <span style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--purple)">Engram</span>
+        <div class="card"
+          style="padding:1.8vh 1vw;border-left:3px solid var(--purple);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+          <span
+            style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--purple)">Engram</span>
           <span class="cb" style="margin:0">Layers rebuild static facts</span>
           <span class="cb" style="margin:0">Retrieve, then reason</span>
-          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Short-circuit model depth</span>
+          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Short-circuit
+            model depth</span>
         </div>
       </div>
       <div class="notes">The receipts side by side. Same column shape: a waste, a geometric fix, a multiplier. Three
@@ -1076,7 +2134,10 @@
   </div>
   <div id="counter"><b id="cnum">1</b> / <span id="ctot">1</span></div>
   <div id="hint">arrows or space to move · N notes · F fullscreen</div>
-  <div id="notes"><h4>presenter notes</h4><div id="notes-body"></div></div>
+  <div id="notes">
+    <h4>presenter notes</h4>
+    <div id="notes-body"></div>
+  </div>
 
   <script>
     /* ============================ SHARED HELPER LIBRARY ============================ */
