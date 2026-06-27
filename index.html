@@ -1021,7 +1021,7 @@
         in more resources. Bigger
         models, more data, and more GPUs. <b> But there is a lot of room to improve by making things more efficient and
           effective.</b></div>
-       
+
     </section>
 
     <section class="slide" id="s-reframe" data-act="all">
@@ -1050,7 +1050,7 @@
           <div class="cp">engram</div>
         </div>
       </div>
-       
+
     </section>
 
     <!-- ===================== ACT I - TURBOQUANT / STORAGE ===================== -->
@@ -1077,7 +1077,7 @@
       </div>
       <div class="ctl"><label>context length <input id="kv-len" type="range" min="0" max="100" value="38"><span
             class="val" id="kv-lenv">8k</span></label></div>
-       
+
     </section>
 
     <section class="slide" id="s-quant" data-act="storage" data-accent="amber">
@@ -1110,7 +1110,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-widegrid" data-act="storage" data-accent="amber">
@@ -1145,7 +1145,7 @@
         </div>
       </div>
       <div class="footer-note">So the fix is not more bits. It is to change the vector's shape before rounding.</div>
-       
+
     </section>
 
     <section class="slide" id="s-rotate" data-act="storage" data-accent="amber">
@@ -1182,7 +1182,7 @@
       </div>
       <div class="footer-note">This technique of using vector rotation to make well-formed key and query vectors appears
         in various literature: DRIVE (arXiv 2105.08339), EDEN (2108.08842), and RaBitQ (2405.12497).</div>
-       
+
     </section>
 
     <section class="slide" id="s-spin2d" data-act="storage" data-accent="amber">
@@ -1212,7 +1212,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-spin3d" data-act="storage" data-accent="amber">
@@ -1243,7 +1243,7 @@
         </div>
       </div>
       <div class="footer-note">A typical coordinate is about 1/√3, near 0.58.</div>
-       
+
     </section>
 
     <section class="slide" id="s-concentrate" data-act="storage" data-accent="amber">
@@ -1273,7 +1273,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-outlier" data-act="storage" data-accent="amber">
@@ -1315,7 +1315,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-codebook" data-act="storage" data-accent="amber">
@@ -1346,7 +1346,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-bias" data-act="storage" data-accent="amber">
@@ -1380,7 +1380,7 @@
       </div>
       <div class="footer-note">At one bit the score keeps only 2/π, about 0.64 of its value, on every key. So
         reconstruction solved one problem, and the inner product is a different one.</div>
-       
+
     </section>
 
     <section class="slide" id="s-qjl" data-act="storage" data-accent="amber">
@@ -1412,7 +1412,7 @@
       </div>
       <div class="footer-note">Same one bit, the difference is where it is spent. The biased mean parks at 0.64; the
         corrected one reaches the truth.</div>
-       
+
     </section>
 
     <section class="slide" id="s-recipe" data-act="storage" data-accent="amber">
@@ -1437,7 +1437,7 @@
             unbiased.</div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-shannon" data-act="storage" data-accent="amber">
@@ -1467,7 +1467,7 @@
       </div>
       <div class="footer-note">Exponential in the bits, and proven for every bit-width. That near-optimality is what
         TurboQuant genuinely adds, and it is why a handful of bits is enough.</div>
-       
+
     </section>
 
     <!-- <section class="slide" id="s-tqresults" data-act="storage" data-accent="amber">
@@ -1524,7 +1524,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-conflate" data-act="learning" data-accent="blue">
@@ -1555,7 +1555,7 @@
             drift apart, and the drift compounds.</div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-path" data-act="learning" data-accent="blue">
@@ -1574,7 +1574,7 @@
           <div class="ctl"><button class="btn" id="path-go">read the sentence</button></div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-step" data-act="learning" data-accent="blue">
@@ -1606,7 +1606,7 @@
             earlier points, so the whole run stays straight, not just neighbors. That is the loss.</div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-decomp" data-act="learning" data-accent="blue">
@@ -1638,7 +1638,7 @@
       </div>
       <div class="footer-note">A straight path is all along and nothing across. That is why it is the low-noise one.
         Every bit of across is data the model has to fit and then average away.</div>
-       
+
     </section>
 
     <section class="slide" id="s-tube" data-act="learning" data-accent="blue">
@@ -1676,7 +1676,7 @@
                 id="tube-eps" type="range" min="0.12" max="0.55" step="0.01" value="0.30"></label></div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-objective" data-act="learning" data-accent="blue">
@@ -1704,7 +1704,7 @@
             predictor. And λ is zero at inference, so it costs nothing to run.</div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-collapse" data-act="learning" data-accent="blue">
@@ -1738,7 +1738,7 @@
           </div>
         </div>
       </div>
-       
+
     </section>
 
     <section class="slide" id="s-oneknob" data-act="learning" data-accent="blue">
@@ -1772,7 +1772,7 @@
         <span class="footer-note" id="fuse-punch" style="margin:0">Raw training: low SNR, you would need ~16x the
           data.</span>
       </div>
-       
+
     </section>
 
     <!-- <section class="slide" id="s-stppunch" data-act="learning" data-accent="blue">
@@ -1792,160 +1792,149 @@
           <h2>Transformers do lookup through computation.</h2>
           <div class="lead">The third cost is depth. To recall one static fact the model rebuilds it layer after
             layer, which looks like the price of knowledge. It is depth spent on something that never changes.</div>
-          <div class="footer-note">"Diana, Princess of Wales" is a fixed entry. Six layers should not be its price.
-            <br>Illustrative trace; source: PatchScopes, Ghandeharioun et al. 2024.
-          </div>
-        </div>
-        <div id="etable">
-          <div class="erow reveal"><span class="el">layer 1</span><span class="ev">Wales</span></div>
-          <div class="erow reveal"><span class="el">layer 3</span><span class="ev">A country in europe</span></div>
-          <div class="erow reveal"><span class="el">layer 4</span><span class="ev">Princess of Wales (unspecific)</span>
-          </div>
-          <div class="erow reveal"><span class="el">layer 5</span><span class="ev">Title for the wife of the Prince of
-              Wales</span></div>
-          <div class="erow reveal final"><span class="el">layer 6</span><span class="ev">Diana, Princess of Wales</span>
-          </div>
         </div>
       </div>
-       
-    </section>
+      <div id="etable">
+        <div class="erow reveal"><span class="el">layer 1</span><span class="ev">Wales</span></div>
+        <div class="erow reveal"><span class="el">layer 3</span><span class="ev">A country in europe</span></div>
+        <div class="erow reveal"><span class="el">layer 4</span><span class="ev">Princess of Wales (unspecific)</span>
+        </div>
+        <div class="erow reveal"><span class="el">layer 5</span><span class="ev">Title for the wife of the Prince of
+            Wales</span></div>
+        <div class="erow reveal final"><span class="el">layer 6</span><span class="ev">Diana, Princess of Wales</span>
+        </div>
+      </div>
+  </div>
 
-    <section class="slide" id="s-sparse" data-act="compute" data-accent="purple">
-      <div class="kicker">part 03 · compute</div>
-      <div class="rule"></div>
-      <h2 class="wide" style="maqrgin-bottom:2.4vh">Two ways to spend less compute.</h2>
-      <div class="cols2" style="max-width:74vw">
-        <div class="card" style="border-top:2px solid var(--mute)">
-          <div class="cl">conditional compute · moe</div>
-          <div class="cb" style="margin-top:0.6vh">For each token, route to a few experts out of many, so the model
-            picks which weights to run. This part is already standard.</div>
+  </section>
+
+  <section class="slide" id="s-sparse" data-act="compute" data-accent="purple">
+    <div class="kicker">part 03 · compute</div>
+    <div class="rule"></div>
+    <h2 class="wide" style="maqrgin-bottom:2.4vh">Two ways to spend less compute.</h2>
+    <div class="cols2" style="max-width:74vw">
+      <div class="card" style="border-top:2px solid var(--mute)">
+        <div class="cl">conditional compute · moe</div>
+        <div class="cb" style="margin-top:0.6vh">For each token, route to a few experts out of many, so the model
+          picks which weights to run. This part is already standard.</div>
+      </div>
+      <div class="card" style="border-top:2px solid var(--purple)">
+        <div class="cl">conditional memory · engram</div>
+        <div class="cb" style="margin-top:0.6vh">For each token, fetch a few rows from a huge table, so the model
+          picks which memories to recall, with no matrix multiply, just a read.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s-engram" data-act="compute" data-accent="purple">
+    <div class="kicker">part 03 · compute</div>
+    <div class="rule"></div>
+    <h2 class="wide" style="margin-bottom:2vh">So add memory you can recall instead of recompute.</h2>
+    <div class="cols2" style="align-items:flex-start">
+      <div class="row" style="gap:2vw;align-items:stretch">
+        <div class="stack grow">
+          <div class="blk tiny">Standard MoE</div>
+          <div class="blk">Tokens</div>
+          <div class="blk">Attention</div>
+          <div class="blk">MoE FFN</div>
+          <div class="blk">Attention</div>
+          <div class="blk">MoE FFN</div>
+          <div class="blk tiny" style="color:var(--red)">Early depth rebuilds entities</div>
+        </div>
+        <div class="stack grow">
+          <div class="blk tiny">Engram</div>
+          <div class="blk">Tokens</div>
+          <div class="blk hot">Engram memory</div>
+          <div class="blk">Attention</div>
+          <div class="blk">MoE FFN</div>
+          <div class="blk">Attention</div>
+          <div class="blk tiny" style="color:var(--green)">Lookup first, depth freed to reason</div>
+        </div>
+      </div>
+      <div class="stack" style="gap:1.2vh">
+        <div class="card" style="border-top:2px solid var(--purple)">
+          <div class="cl">1 · retrieve</div>
+          <div class="cb" style="margin-top:0">Hash the last 2-gram and 3-gram into a giant embedding table. O(1)
+            lookup, no compute.</div>
         </div>
         <div class="card" style="border-top:2px solid var(--purple)">
-          <div class="cl">conditional memory · engram</div>
-          <div class="cb" style="margin-top:0.6vh">For each token, fetch a few rows from a huge table, so the model
-            picks which memories to recall, with no matrix multiply, just a read.</div>
+          <div class="cl">2 · gate</div>
+          <div class="cb" style="margin-top:0">A context-aware gate suppresses retrievals that do not fit, so noise
+            never enters the stream.</div>
+        </div>
+        <div class="card" style="border-top:2px solid var(--purple)">
+          <div class="cl">3 · inject</div>
+          <div class="cb" style="margin-top:0">Add it to the running representation at layer 2, before reconstruction
+            would have begun.</div>
         </div>
       </div>
-      <div class="footer-note">A fact you can look up should not cost a full expert. Engram puts the second kind of
-        sparsity next to the first.</div>
-       
-    </section>
+    </div>
+  </section>
 
-    <section class="slide" id="s-engram" data-act="compute" data-accent="purple">
-      <div class="kicker">part 03 · compute</div>
-      <div class="rule"></div>
-      <h2 class="wide" style="margin-bottom:2vh">So add memory you can recall instead of recompute.</h2>
-      <div class="cols2" style="align-items:flex-start">
-        <div class="row" style="gap:2vw;align-items:stretch">
-          <div class="stack grow">
-            <div class="blk tiny">Standard MoE</div>
-            <div class="blk">Tokens</div>
-            <div class="blk">Attention</div>
-            <div class="blk">MoE FFN</div>
-            <div class="blk">Attention</div>
-            <div class="blk">MoE FFN</div>
-            <div class="blk tiny" style="color:var(--red)">Early depth rebuilds entities</div>
-          </div>
-          <div class="stack grow">
-            <div class="blk tiny">Engram</div>
-            <div class="blk">Tokens</div>
-            <div class="blk hot">Engram memory</div>
-            <div class="blk">Attention</div>
-            <div class="blk">MoE FFN</div>
-            <div class="blk">Attention</div>
-            <div class="blk tiny" style="color:var(--green)">Lookup first, depth freed to reason</div>
-          </div>
+  <section class="slide" id="s-ucurve" data-act="compute" data-accent="purple">
+    <div class="kicker">part 03 · compute</div>
+    <div class="rule"></div>
+    <div class="cols2 demo-left">
+      <div class="stagewrap">
+        <div class="stage">
+          <span class="cap"><b>VAL LOSS</b> vs compute split</span>
+
+          <canvas id="ucurve-cv"></canvas>
         </div>
-        <div class="stack" style="gap:1.2vh">
-          <div class="card" style="border-top:2px solid var(--purple)">
-            <div class="cl">1 · retrieve</div>
-            <div class="cb" style="margin-top:0">Hash the last 2-gram and 3-gram into a giant embedding table. O(1)
-              lookup, no compute.</div>
+      </div>
+      <div>
+        <h2>The sparsity sweet spot.</h2>
+        <div class="lead">Balance between MoE and Engram to get the best out of short-circuiting fact retrieval in early
+          layers while getting the most out of rasoning</div>
+        <div class="ctl"><label>moe share <input id="uc-rho" type="range" min="0" max="100" value="30"><span class="val"
+              id="uc-rhov">30%</span></label></div>
+        <div class="tiles" style="margin-top:1.6vh">
+          <div class="tile">
+            <div class="tl">val loss</div>
+            <div class="tv" id="uc-loss">0.00</div>
           </div>
-          <div class="card" style="border-top:2px solid var(--purple)">
-            <div class="cl">2 · gate</div>
-            <div class="cb" style="margin-top:0">A context-aware gate suppresses retrievals that do not fit, so noise
-              never enters the stream.</div>
-          </div>
-          <div class="card" style="border-top:2px solid var(--purple)">
-            <div class="cl">3 · inject</div>
-            <div class="cb" style="margin-top:0">Add it to the running representation at layer 2, before reconstruction
-              would have begun.</div>
+          <div class="tile">
+            <div class="tl">regime</div>
+            <div class="tv" id="uc-reg" style="font-size:clamp(14px,1.5vw,20px)">too little moe</div>
           </div>
         </div>
       </div>
-      <div class="footer-note">Tables run 5.7B to 18.5B params, offloaded to host DRAM. Deterministic lookup means
-        async prefetch, under 3% throughput cost.</div>
-       
-    </section>
+    </div>
+    <div class="footer-note">At the floor, Engram-27B beats an iso-param iso-FLOPs MoE baseline everywhere, with the
+      biggest gains on reasoning, code, and math.</div>
 
-    <section class="slide" id="s-ucurve" data-act="compute" data-accent="purple">
-      <div class="kicker">part 03 · compute</div>
-      <div class="rule"></div>
-      <div class="cols2 demo-left">
-        <div class="stagewrap">
-          <div class="stage">
-            <span class="cap"><b>VAL LOSS</b> vs compute split</span>
+  </section>
 
-            <canvas id="ucurve-cv"></canvas>
-          </div>
-        </div>
-        <div>
-          <h2>The sparsity sweet spot.</h2>
-          <div class="lead">Split the budget between Engram lookup and MoE experts. Lean too far toward MoE and you
-            waste early layers on facts; lean too far toward Engram and you starve the reasoning. In between, the loss
-            traces a U.</div>
-          <div class="ctl"><label>moe share <input id="uc-rho" type="range" min="0" max="100" value="30"><span
-                class="val" id="uc-rhov">30%</span></label></div>
-          <div class="tiles" style="margin-top:1.6vh">
-            <div class="tile">
-              <div class="tl">val loss</div>
-              <div class="tv" id="uc-loss">0.00</div>
-            </div>
-            <div class="tile">
-              <div class="tl">regime</div>
-              <div class="tv" id="uc-reg" style="font-size:clamp(14px,1.5vw,20px)">too little moe</div>
-            </div>
-          </div>
+  <section class="slide" id="s-deeper" data-act="compute" data-accent="purple">
+    <div class="kicker">part 03 · compute</div>
+    <div class="rule"></div>
+    <div class="cols2 demo-left">
+      <div class="stagewrap">
+        <div class="stage">
+          <span class="cap"><b>CKA</b> · engram vs moe layers</span>
+          <canvas id="cka-cv"></canvas>
         </div>
       </div>
-      <div class="footer-note">At the floor, Engram-27B beats an iso-param iso-FLOPs MoE baseline everywhere, with the
-        biggest gains on reasoning, code, and math.</div>
-       
-    </section>
-
-    <section class="slide" id="s-deeper" data-act="compute" data-accent="purple">
-      <div class="kicker">part 03 · compute</div>
-      <div class="rule"></div>
-      <div class="cols2 demo-left">
-        <div class="stagewrap">
-          <div class="stage">
-            <span class="cap"><b>CKA</b> · engram vs moe layers</span>
-            <canvas id="cka-cv"></canvas>
+      <div>
+        <h2>It makes the network effectively deeper.</h2>
+        <div class="lead">Freed from rebuilding entities, Engram reaches deep representations earlier. Its layer 5
+          already matches a plain MoE layer 12.</div>
+        <div class="tiles" style="margin-top:1.4vh">
+          <div class="tile">
+            <div class="tl">engram L5 matches moe</div>
+            <div class="tv">L12</div>
           </div>
         </div>
-        <div>
-          <h2>It makes the network effectively deeper.</h2>
-          <div class="lead">Freed from rebuilding entities, Engram reaches deep representations earlier. Its layer 5
-            already matches a plain MoE layer 12.</div>
-          <div class="tiles" style="margin-top:1.4vh">
-            <div class="tile">
-              <div class="tl">engram L5 matches moe</div>
-              <div class="tv">L12</div>
-            </div>
-          </div>
-          <div class="footer-note" style="margin-top:1.8vh">The gate fires on multi-token entities and set phrases, even
-            though it was never trained to. That behavior just emerges.</div>
-          <div class="seq" style="margin-top:1vh">
-            <span class="tok">only</span><span class="tok warm">alexander</span><span class="tok">the</span><span
-              class="tok warm">great</span><span class="tok">tamed</span><span class="tok warm">bucephalus</span>
-          </div>
+        <div class="seq" style="margin-top:1vh">
+          <span class="tok">only</span><span class="tok warm">alexander</span><span class="tok">the</span><span
+            class="tok warm">great</span><span class="tok">tamed</span><span class="tok warm">bucephalus</span>
         </div>
       </div>
-       
-    </section>
+    </div>
 
-    <!-- <section class="slide" id="s-engramresults" data-act="compute" data-accent="purple">
+  </section>
+
+  <!-- <section class="slide" id="s-engramresults" data-act="compute" data-accent="purple">
       <div class="kicker">part 03 · compute</div>
       <div class="rule"></div>
       <h2 class="wide">The gains land where you would not expect.</h2>
@@ -1966,7 +1955,7 @@
        
     </section> -->
 
-    <!-- <section class="slide" id="s-engrampunch" data-act="compute" data-accent="purple">
+  <!-- <section class="slide" id="s-engrampunch" data-act="compute" data-accent="purple">
       <div class="kicker">part 03 · compute</div>
       <h2 class="wide" style="font-size:clamp(30px,5.2vw,76px);max-width:24ch">Reading a fact from a table is one
         lookup. Rebuilding it through attention is <span class="acc">many layers.</span> So Engram just reads.</h2>
@@ -1975,49 +1964,49 @@
        
     </section> -->
 
-    <!-- ===================== SYNTHESIS ===================== -->
-    <section class="slide" id="s-three" data-act="all">
-      <div class="kicker" style="color:var(--text)">Wrapping up</div>
-      <h2 class="wide" style="margin-bottom:2.4vh">Three directions</h2>
-      <div style="display:flex;flex-direction:column;gap:1.2vh;max-width:80vw">
-        <div
-          style="display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;font-family:'JetBrains Mono',monospace;font-size:clamp(9px,0.9vw,11.5px);letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);padding:0 1vw">
-          <span>paper</span><span>the cost everyone pays</span><span>the fix</span><span>the win</span>
-        </div>
-        <div class="card"
-          style="padding:1.8vh 1vw;border-left:3px solid var(--amber);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
-          <span
-            style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--amber)">DRIVE,
-            EDEN, RaBitQ, TurboQuant</span>
-          <span class="cb" style="margin:0">Keys stored in more bits than required</span>
-          <span class="cb" style="margin:0">Rotate, then quantize, push in the right direction</span>
-          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less space to
-            store</span>
-        </div>
-        <div class="card"
-          style="padding:1.8vh 1vw;border-left:3px solid var(--blue);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
-          <span
-            style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--blue)">Semantic
-            Tube</span>
-          <span class="cb" style="margin:0">Training fits surface noise as signal</span>
-          <span class="cb" style="margin:0">Enforce the geodesic</span>
-          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less data to
-            train</span>
-        </div>
-        <div class="card"
-          style="padding:1.8vh 1vw;border-left:3px solid var(--purple);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
-          <span
-            style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--purple)">Engram</span>
-          <span class="cb" style="margin:0">Layers rebuild static facts</span>
-          <span class="cb" style="margin:0">Retrieve, then reason</span>
-          <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Short-circuit
-            model depth</span>
-        </div>
+  <!-- ===================== SYNTHESIS ===================== -->
+  <section class="slide" id="s-three" data-act="all">
+    <div class="kicker" style="color:var(--text)">Wrapping up</div>
+    <h2 class="wide" style="margin-bottom:2.4vh">Three directions</h2>
+    <div style="display:flex;flex-direction:column;gap:1.2vh;max-width:80vw">
+      <div
+        style="display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;font-family:'JetBrains Mono',monospace;font-size:clamp(9px,0.9vw,11.5px);letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);padding:0 1vw">
+        <span>paper</span><span>the cost everyone pays</span><span>the fix</span><span>the win</span>
       </div>
-       
-    </section>
+      <div class="card"
+        style="padding:1.8vh 1vw;border-left:3px solid var(--amber);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+        <span
+          style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--amber)">DRIVE,
+          EDEN, RaBitQ, TurboQuant</span>
+        <span class="cb" style="margin:0">Keys stored in more bits than required</span>
+        <span class="cb" style="margin:0">Rotate, then quantize, push in the right direction</span>
+        <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less space to
+          store</span>
+      </div>
+      <div class="card"
+        style="padding:1.8vh 1vw;border-left:3px solid var(--blue);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+        <span
+          style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--blue)">Semantic
+          Tube</span>
+        <span class="cb" style="margin:0">Training fits surface noise as signal</span>
+        <span class="cb" style="margin:0">Enforce the geodesic</span>
+        <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Less data to
+          train</span>
+      </div>
+      <div class="card"
+        style="padding:1.8vh 1vw;border-left:3px solid var(--purple);display:grid;grid-template-columns:1.1fr 1.4fr 1.3fr 1fr;gap:1.4vw;align-items:center">
+        <span
+          style="font-family:'Space Grotesk';font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--purple)">Engram</span>
+        <span class="cb" style="margin:0">Layers rebuild static facts</span>
+        <span class="cb" style="margin:0">Retrieve, then reason</span>
+        <span style="font-family:'JetBrains Mono';color:var(--text);font-size:clamp(12px,1.2vw,16px)">Short-circuit
+          model depth</span>
+      </div>
+    </div>
 
-    <!-- <section class="slide" id="s-thread" data-act="all">
+  </section>
+
+  <!-- <section class="slide" id="s-thread" data-act="all">
       <div class="kicker" style="color:var(--text)">the common thread</div>
       <h2 class="wide" style="margin-bottom:3vh">Look at what each one actually did.</h2>
       <div style="display:flex;flex-direction:column;gap:1.8vh;max-width:48ch">
@@ -2032,7 +2021,7 @@
        
     </section> -->
 
-    <!-- <section class="slide" id="s-close" data-act="all" data-accent="blue">
+  <!-- <section class="slide" id="s-close" data-act="all" data-accent="blue">
       <canvas id="close-cv" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.45"></canvas>
       <div style="z-index:1">
         <div class="kicker">Wrap</div>
@@ -2045,7 +2034,7 @@
        
     </section> -->
 
-    <!-- BUILD:SLIDES -->
+  <!-- BUILD:SLIDES -->
 
   </div>
 
@@ -2057,7 +2046,7 @@
     <span class="seg s3">compute</span>
   </div>
   <div id="counter"><b id="cnum">1</b> / <span id="ctot">1</span></div>
-  <div id="hint">arrows or space to move · N notes · F fullscreen</div>
+  <div id="hint">arrows or space to move · F fullscreen</div>
   <div id="notes">
     <h4>presenter notes</h4>
     <div id="notes-body"></div>
